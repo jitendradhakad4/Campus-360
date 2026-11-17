@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus360 Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Campus360: navy + white + restrained gold, B-school calm. Layout: collapsible navy sidebar (desktop) / bottom tabs (mobile), cards on a cool-grey canvas. */
+:root{
+  --navy:#0b1a33; --navy-2:#16294a; --navy-3:#2a4270; --ink:#0d1b33; --muted:#5d6b82; --faint:#8a97ab;
+  --line:#e2e7ef; --bg:#f3f5f9; --card:#ffffff; --tint:#edf1f8;
+  --gold:#c49a2c; --gold-2:#e2c062; --gold-soft:#f8f0d9;
+  --red:#c2362f; --red-soft:#fdeceb; --green:#1d8559; --green-soft:#e4f4ec; --amber:#a86a06; --amber-soft:#fff3d9; --blue:#2463a8; --blue-soft:#e6f0fb;
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+  --body:"Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:16px; --shadow:0 1px 2px rgba(11,26,51,.05),0 6px 20px rgba(11,26,51,.06);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:8px}
+h1,h2,h3{margin:0;text-wrap:balance}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ic.sm{width:14px;height:14px}.ic.lg{width:22px;height:22px}
+.num{font-variant-numeric:tabular-nums}
+
+/* banner */
+.proto{background:var(--gold-soft);color:#6b5210;font-size:12px;padding:6px 16px;text-align:center;border-bottom:1px solid #efe0b3}
+.proto b{font-weight:700}
+.proto button{text-decoration:underline;font-weight:600;margin-left:6px}
+
+/* shell */
+.shell{display:grid;grid-template-columns:248px 1fr;min-height:calc(100% - 29px)}
+.shell.col{grid-template-columns:76px 1fr}
+.side{position:sticky;top:0;height:100vh;background:var(--navy);color:#c6d0e2;display:flex;flex-direction:column;padding:16px 12px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.brand b{color:#fff;font-size:16px;letter-spacing:-.01em}.brand b span{color:var(--gold-2)}
+.brand small{display:block;font-size:11px;color:#8090ad}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1;overflow:auto}
+.nav a,.nav button{position:relative;display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:12px;font-weight:500;color:#c6d0e2;text-align:left;width:100%}
+.nav a:hover,.nav button:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav a.on{background:rgba(255,255,255,.1);color:#fff}
+.nav a.on::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;border-radius:0 3px 3px 0;background:var(--gold-2)}
+.nav .cap{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6f80a0;padding:16px 12px 6px}
+.nav .pill{margin-left:auto;background:var(--gold-2);color:var(--navy);font-size:10px;font-weight:700;border-radius:99px;padding:1px 6px}
+.shell.col .nav a span.l,.shell.col .brand div,.shell.col .nav .cap,.shell.col .nav .pill{display:none}
+.shell.col .nav a,.shell.col .nav button{justify-content:center}
+.foot{border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
+.top{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1140px;margin:0 auto;height:60px;display:flex;align-items:center;gap:12px;padding:0 20px}
+.mbrand{display:none;align-items:center;gap:8px;font-weight:700}
+.mbrand span{color:var(--gold)}
+.sbtn{flex:1;max-width:460px;display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--line);background:var(--bg);border-radius:12px;color:var(--faint)}
+.sbtn kbd{margin-left:auto;font:600 10px var(--body);border:1px solid var(--line);background:#fff;border-radius:6px;padding:1px 5px;color:var(--muted)}
+.iconbtn{position:relative;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--navy-2)}
+.iconbtn:hover{background:var(--tint)}
+.dot{position:absolute;top:5px;right:5px;min-width:16px;height:16px;border-radius:99px;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--navy-3),var(--navy));color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px;flex-shrink:0}
+.av.lg{width:64px;height:64px;font-size:22px}
+main .wrap{max-width:1140px;margin:0 auto;padding:22px 20px 120px}
+.bnav{display:none;position:fixed;inset:auto 0 0 0;z-index:30;background:rgba(255,255,255,.96);border-top:1px solid var(--line);grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.bnav a,.bnav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0;font-size:10.5px;font-weight:600;color:var(--faint)}
+.bnav .on{color:var(--navy)}
+.bnav .ic{width:22px;height:22px}
+@media (max-width:1023px){.shell,.shell.col{grid-template-columns:1fr}.side{display:none}.bnav{display:grid}.mbrand{display:flex}}
+@media (max-width:640px){.sbtn span.t,.sbtn kbd{display:none}.sbtn{flex:0 0 40px;justify-content:center;padding:0}.top .in{justify-content:space-between}}
+
+/* building blocks */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.pad{padding:18px}
+.ph{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.ph h1{font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:-.01em}
+.ph p{margin:4px 0 0;color:var(--muted)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.between{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.g2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.main-side{display:grid;gap:20px;grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+@media (max-width:1023px){.main-side{grid-template-columns:1fr}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.g2,.g3{grid-template-columns:1fr}.g4.keep{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sec{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+.sec h2{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.link{color:var(--navy-3);font-weight:600;font-size:13px}
+.muted{color:var(--muted)}.faint{color:var(--faint)}.small{font-size:12px}.xs{font-size:11px}
+.b{font-weight:700}.sb{font-weight:600}
+.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.trunc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:12px;font-weight:600;background:var(--navy);color:#fff;transition:transform .1s,background .15s;white-space:nowrap}
+.btn:hover{background:var(--navy-2)}.btn:active{transform:scale(.98)}
+.btn.gold{background:var(--gold);color:#fff}.btn.gold:hover{background:#b08a24}
+.btn.out{background:#fff;color:var(--navy);border:1px solid var(--line)}.btn.out:hover{background:var(--tint)}
+.btn.soft{background:var(--tint);color:var(--navy)}
+.btn.ghost{background:transparent;color:var(--navy-3)}
+.btn.red{background:var(--red)}
+.btn.sm{height:32px;padding:0 12px;font-size:13px;border-radius:10px}
+.btn.full{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--tint);color:var(--navy-2);white-space:nowrap}
+.badge.gold{background:var(--gold-soft);color:#7d5f10}.badge.red{background:var(--red-soft);color:var(--red)}.badge.green{background:var(--green-soft);color:var(--green)}
+.badge.amber{background:var(--amber-soft);color:var(--amber)}.badge.blue{background:var(--blue-soft);color:var(--blue)}.badge.dark{background:var(--navy);color:var(--gold-2)}
+.tag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:6px}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:99px;padding:6px 14px;font-size:13px;font-weight:600}
+.chip.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.seg{display:inline-flex;background:#e7ebf2;border-radius:12px;padding:4px;gap:2px}
+.seg button{padding:6px 14px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.seg .n{margin-left:6px;background:var(--gold);color:#fff;border-radius:99px;font-size:10px;padding:0 6px}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:14px}
+.toolbar .grow{margin-left:auto}
+
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600}
+.inp{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:400}
+.inp:focus{outline:none;border-color:var(--navy-3);box-shadow:0 0 0 3px #dfe6f3}
+select.inp{padding-right:30px}
+textarea.inp{min-height:90px;resize:vertical}
+.hint{font-size:12px;color:var(--muted);font-weight:400}
+.err{font-size:12px;color:var(--red);font-weight:600}
+.form{display:flex;flex-direction:column;gap:14px}
+.formrow{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+@media (max-width:640px){.formrow{grid-template-columns:1fr}}
+
+.empty{border:1px dashed #cfd7e4;border-radius:var(--r);padding:40px 20px;text-align:center;color:var(--muted);background:rgba(255,255,255,.6)}
+.empty b{display:block;color:var(--ink);margin-bottom:4px}
+
+/* home */
+.hero{position:relative;overflow:hidden;background:var(--navy);color:#fff;border-radius:22px;padding:26px 28px}
+.hero::after{content:"";position:absolute;right:-80px;top:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(226,192,98,.28),transparent 65%)}
+.hero h1{font-family:var(--display);font-size:32px;font-weight:700;letter-spacing:-.01em;margin-top:4px}
+.hero .d{color:#9fb0cd;font-size:13px}
+.hero .row{margin-top:14px;position:relative;z-index:1}
+.hp{background:rgba(255,255,255,.1);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:600}
+.hp.g{background:var(--gold-2);color:var(--navy)}
+.urgent{display:flex;gap:12px;align-items:flex-start;background:var(--red-soft);border:1px solid #f4c9c6;color:#7d1d18;border-radius:var(--r);padding:14px 16px;text-align:left;width:100%}
+.urgent .ic{color:var(--red);margin-top:2px}
+.short{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
+.short a{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--navy-2);text-align:center}
+.short a span.i{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;transition:transform .15s}
+.short a:hover span.i{transform:translateY(-2px)}
+@media (max-width:640px){.short{display:flex;overflow-x:auto;scrollbar-width:none}.short a{flex:0 0 74px}}
+.now{display:flex;align-items:center;gap:14px;padding:14px 16px;background:linear-gradient(90deg,var(--tint),#fff);border-bottom:1px solid var(--line)}
+.now .k{font-size:10px;font-weight:800;letter-spacing:.08em;padding:4px 8px;border-radius:8px;background:var(--navy);color:var(--gold-2)}
+.now .k.live{background:var(--green);color:#fff}
+.li{display:flex;align-items:center;gap:14px;padding:11px 16px;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .t{width:68px;flex-shrink:0;font-size:12px;font-weight:700;color:var(--navy-3)}
+.li.past{opacity:.5}
+.strike{text-decoration:line-through}
+.hscroll{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+.hscroll>*{flex:0 0 260px;scroll-snap-align:start}
+
+/* event card */
+.ev{display:flex;flex-direction:column;overflow:hidden;text-align:left;width:100%;height:100%;transition:transform .15s,box-shadow .15s}
+.ev:hover,.hov:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(11,26,51,.12)}
+.ev .art{position:relative;height:104px}
+.ev .date{position:absolute;left:12px;top:12px;background:#fff;border-radius:10px;padding:4px 9px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.ev .date small{display:block;font-size:10px;font-weight:800;color:var(--red);letter-spacing:.05em}
+.ev .date b{font-size:18px;line-height:1.1}
+.ev .reg{position:absolute;right:10px;bottom:10px;background:#fff;color:var(--green);border-radius:99px;font-size:11px;font-weight:700;padding:3px 8px;display:flex;gap:4px;align-items:center}
+.ev .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.ev h3{font-size:15px;line-height:1.3}
+.meta{display:flex;flex-direction:column;gap:3px;margin-top:auto;padding-top:6px;font-size:12px;color:var(--muted)}
+.meta span{display:flex;align-items:center;gap:6px}
+.bar{height:6px;border-radius:99px;background:var(--tint);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--navy-3);border-radius:99px}
+
+.cd{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--navy-3);white-space:nowrap}
+.cd.hot{color:var(--red)}.cd.done{color:var(--faint)}
+
+/* tiles */
+.tile{aspect-ratio:4/3;display:grid;place-items:center;color:rgba(255,255,255,.9);position:relative}
+.tile .ic{width:38px;height:38px;stroke-width:1.5}
+.tile .tl{position:absolute;left:8px;top:8px;display:flex;gap:4px}
+.heart{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;color:var(--muted)}
+.heart.on{color:var(--red)}.heart.on .ic{fill:var(--red)}
+
+/* parcels */
+.steps{display:flex;align-items:center;margin:4px 0}
+.steps .s{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;background:#e4e9f1;color:var(--muted);flex-shrink:0}
+.steps .s.on{background:var(--navy);color:#fff}
+.steps .ln{flex:1;height:2px;background:#e4e9f1}.steps .ln.on{background:var(--navy)}
+.steplbl{display:grid;grid-template-columns:repeat(5,1fr);font-size:10.5px;color:var(--muted);margin-top:6px}
+.steplbl span:nth-child(n+2){text-align:center}.steplbl span:last-child{text-align:right}
+.otp{display:flex;gap:16px;align-items:center;background:var(--gold-soft);border-top:1px solid #efdfae;padding:16px}
+.otp .code{font-size:30px;font-weight:800;letter-spacing:.3em;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.otp{flex-direction:column;text-align:center}.steplbl{display:none}}
+
+/* chat */
+.chatwrap{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 200px);min-height:460px;overflow:hidden}
+.chatlist{border-right:1px solid var(--line);overflow:auto}
+.ci{display:flex;gap:10px;padding:14px;border-bottom:1px solid var(--line);text-align:left;width:100%}
+.ci.on{background:var(--tint)}
+.thread{display:flex;flex-direction:column;min-width:0}
+.thead{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.msgs{flex:1;overflow:auto;padding:16px;background:#f7f9fc;display:flex;flex-direction:column;gap:6px}
+.m{max-width:76%;padding:8px 12px;border-radius:16px;font-size:14px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05);align-self:flex-start;border-bottom-left-radius:5px}
+.m.me{background:var(--navy);color:#fff;align-self:flex-end;border-bottom-left-radius:16px;border-bottom-right-radius:5px}
+.m small{display:block;font-size:10px;opacity:.6;text-align:right;margin-top:2px}
+.compose{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+@media (min-width:761px){[data-a="closeThread"]{display:none}}
+.typing{font-size:12px;color:var(--muted);font-style:italic}
+@media (max-width:1023px){.chatwrap{height:calc(100dvh - 320px);min-height:380px}}
+@media (max-width:760px){.chatwrap{grid-template-columns:1fr}.chatwrap.thread-open .chatlist{display:none}.chatwrap:not(.thread-open) .thread{display:none}}
+
+/* notifications */
+.nt{display:flex;gap:12px;padding:14px 16px;text-align:left;width:100%;border-radius:var(--r);background:#fff;border:1px solid var(--line)}
+.nt.unread{border-left:4px solid var(--navy-3)}
+.nt.urg{background:var(--red-soft);border-color:#f2c7c4}
+.nt.imp{background:#fffaf0;border-color:#f0e2bd}
+.nt .ico{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--tint);color:var(--navy-3);flex-shrink:0}
+.nt.urg .ico{background:var(--red);color:#fff}.nt.imp .ico{background:var(--gold);color:#fff}
+
+/* modal */
+.ov{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(7,16,34,.45);backdrop-filter:blur(2px)}
+.md{background:#fff;border-radius:22px;width:100%;max-width:560px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:pop .18s ease-out}
+.md.wide{max-width:760px}
+.md .mh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.md .mh h3{font-size:16px}
+.md .mb{padding:18px 20px;overflow:auto}
+.md .mf{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--line)}
+@media (max-width:640px){.ov{align-items:flex-end;padding:0}.md{border-radius:22px 22px 0 0;max-height:92vh}}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.banner{position:relative;border-radius:18px;padding:22px;color:#fff;overflow:hidden}
+.info{display:flex;gap:10px}
+.info .bx{width:36px;height:36px;border-radius:11px;background:var(--tint);color:var(--navy-3);display:grid;place-items:center;flex-shrink:0}
+
+.toastz{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--navy);color:#fff;padding:11px 16px;border-radius:12px;font-weight:600;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;gap:8px;align-items:center;animation:pop .2s}
+.toast .ic{color:var(--gold-2)}
+@media (min-width:1024px){.toastz{bottom:28px}}
+
+/* search */
+.sres{display:flex;flex-direction:column;gap:2px}
+.sres a,.sres button{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;text-align:left;width:100%}
+.sres a:hover,.sres button:hover{background:var(--tint)}
+.sgrp{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);padding:10px 10px 4px}
+
+/* login */
+.login{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100% - 29px)}
+.lhero{background:var(--navy);color:#fff;padding:48px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.lhero::after{content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(226,192,98,.22),transparent 65%)}
+.lhero h1{font-family:var(--display);font-size:44px;line-height:1.08;margin-top:auto;max-width:460px}
+.lhero h1 span{color:var(--gold-2)}
+.lhero p{color:#a9b7d0;max-width:440px;font-size:15px}
+.lfeat{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:460px;margin-top:22px}
+.lfeat div{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 12px;display:flex;gap:8px;align-items:center;font-size:13px}
+.lfeat .ic{color:var(--gold-2)}
+.lform{display:flex;align-items:center;justify-content:center;padding:28px}
+.lform>div{width:100%;max-width:380px}
+.otpinp{font-size:22px;letter-spacing:.4em;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.demo-hint{background:var(--gold-soft);color:#6b5210;border-radius:10px;padding:8px 12px;font-size:12px}
+@media (max-width:860px){.login{grid-template-columns:1fr}.lhero{display:none}}
+.pick{display:flex;flex-wrap:wrap;gap:8px}
+.pick label{cursor:pointer}
+.pick input{position:absolute;opacity:0;pointer-events:none}
+.pick span{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--muted);background:#fff}
+.pick input:checked+span{background:var(--navy);color:#fff;border-color:var(--navy)}
+.pick input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px}
+
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);padding:10px 14px;background:#f7f9fc}
+table.t td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:middle}
+.scrollx{overflow-x:auto}
+.stat{display:flex;gap:12px;align-items:center;padding:16px}
+.stat .bx{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--tint);color:var(--navy-3)}
+.stat b{font-size:22px;display:block;line-height:1.1}
+.hbar{display:flex;align-items:center;gap:12px;font-size:13px;margin-bottom:10px}
+.hbar span:first-child{width:110px;color:var(--muted)}
+.hbar .bar{flex:1;height:9px}
+.hbar b{width:36px;text-align:right}
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);width:100%;text-align:left}
+.toggle:first-child{border-top:0}
+.sw{width:42px;height:24px;border-radius:99px;background:#cbd3df;position:relative;flex-shrink:0;transition:background .15s}
+.sw::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sw.on{background:var(--navy-3)}.sw.on::after{left:21px}
+.daystrip{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px}
+.daystrip button{flex:0 0 58px;border-radius:16px;background:#fff;padding:8px 0;display:flex;flex-direction:column;align-items:center;border:1px solid var(--line)}
+.daystrip button small{font-size:11px;color:var(--muted);font-weight:600}
+.daystrip button b{font-size:19px}
+.daystrip button.on{background:var(--navy);color:#fff;border-color:var(--navy)}.daystrip button.on small{color:#9fb0cd}
+.daystrip button.today::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold);margin-top:2px}
+.week{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;min-width:780px}
+.wk{border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px 10px;font-size:12px}
+.wk.c{background:var(--red-soft);border-color:#f2c7c4}.wk.ch{background:var(--amber-soft);border-color:#f2deae}
+.wk.live{box-shadow:0 0 0 2px var(--green)}
+.whd{text-align:center;font-weight:700;font-size:13px;padding:8px;border-radius:12px;background:#fff;border:1px solid var(--line);margin-bottom:8px}
+.whd.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.vote{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 8px;border-radius:12px;background:var(--tint);font-size:12px;font-weight:700;color:var(--muted);height:fit-content}
+.vote.on{background:var(--navy);color:#fff}
+.boards a{display:flex;gap:12px;align-items:flex-start;padding:16px}
+.bico{width:42px;height:42px;border-radius:13px;background:var(--navy);color:var(--gold-2);display:grid;place-items:center;font-weight:800;font-size:13px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toastz" id="toasts" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+var D=86400000,H=3600000,TZ='Asia/Kolkata';
+var ICONS={
+home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+cal:'<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
+trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
+bag:'<path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M21.5 20a6.5 6.5 0 0 0-4-6"/>',
+chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/>',
+mega:'<path d="M3 11v2a1 1 0 0 0 1 1h3l6 4V6L7 10H4a1 1 0 0 0-1 1zM17 8.5a4.5 4.5 0 0 1 0 7"/>',
+bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+x:'<path d="M6 6l12 12M18 6 6 18"/>',
+pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+check:'<path d="m5 12 5 5 9-10"/>',
+heart:'<path d="M12 20s-8-4.8-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6.2-8 11-8 11z"/>',
+bookmark:'<path d="M6 3h12v18l-6-4-6 4z"/>',
+alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+send:'<path d="M4 12 20 4l-6 16-3-7z"/>',
+arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
+left:'<path d="m15 6-6 6 6 6"/>',right:'<path d="m9 6 6 6-6 6"/>',
+qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/>',
+flag:'<path d="M5 21V4h11l-2 4 2 4H5"/>',
+logout:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+up:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>',
+book:'<path d="M4 4h6a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3"/><path d="M20 4v15h-7"/>',
+upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.6-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3.6 15 1.6 1.6 0 0 0 2 14H2a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.2-2.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 3.6V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.6 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 20.4 9H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 2z"/>',
+tag:'<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>',
+chevs:'<path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/>',
+eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'
+};
+function I(n,c){return '<svg class="ic '+(c||'')+'" viewBox="0 0 24 24" aria-hidden="true">'+(ICONS[n]||'')+'</svg>';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fm(o){return new Intl.DateTimeFormat('en-IN',Object.assign({timeZone:TZ},o));}
+var fDay=function(t){return fm({weekday:'short',day:'numeric',month:'short'}).format(t);};
+var fTime=function(t){return fm({hour:'numeric',minute:'2-digit',hour12:true}).format(t).toLowerCase();};
+var fLong=function(t){return fm({weekday:'long',day:'numeric',month:'long'}).format(t);};
+var fDT=function(t){return fDay(t)+', '+fTime(t);};
+var fMon=function(t){return fm({month:'short'}).format(t).toUpperCase();};
+var fDnum=function(t){return fm({day:'numeric'}).format(t);};
+var dkey=function(t){return new Intl.DateTimeFormat('en-CA',{timeZone:TZ}).format(t);};
+function mid(off){return new Date(dkey(Date.now()+(off||0)*D)+'T00:00:00+05:30').getTime();}
+function at(off,h,m){return mid(off)+h*H+(m||0)*60000;}
+function dow(off){return new Date(mid(off)+5.5*H).getUTCDay();}
+function istHour(){return Number(fm({hour:'numeric',hour12:false}).format(Date.now()))%24;}
+function rel(t){var s=(t-Date.now())/1000,a=Math.abs(s),r=new Intl.RelativeTimeFormat('en',{numeric:'auto'});
+  if(a<60)return 'just now';if(a<3600)return r.format(Math.round(s/60),'minute');if(a<86400)return r.format(Math.round(s/3600),'hour');if(a<86400*30)return r.format(Math.round(s/86400),'day');return fDay(t);}
+function cdl(t){var ms=t-Date.now();if(ms<=0)return 'Closed';var d=Math.floor(ms/D),h=Math.floor(ms%D/H),m=Math.floor(ms%H/60000);return d>0?d+'d '+h+'h left':h>0?h+'h '+m+'m left':m+'m left';}
+function cd(t,pre){var ms=t-Date.now();var c=ms<=0?'done':ms<3*D?'hot':'';return '<span class="cd '+c+'" data-t="'+t+'" data-pre="'+esc(pre||'')+'">'+I('timer','sm')+'<span>'+esc(pre||'')+cdl(t)+'</span></span>';}
+function rupees(n){return '₹'+Number(n).toLocaleString('en-IN');}
+function uid(){return Math.random().toString(36).slice(2,9);}
+function initials(n){return String(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(function(s){return s[0].toUpperCase();}).join('');}
+
+/* ---------------------------------------------------------------- data */
+var CATS={committee:['Committee','#16294a','#3d5a92'],club:['Club','#2f3f9e','#3d8bd6'],cultural:['Cultural','#b5304f','#e09a3e'],sports:['Sports','#11744e','#7bb342'],academic:['Academic','#11597e','#2aa5bf'],placement:['Placement','#8a6512','#d2a93c'],guest_lecture:['Guest Lecture','#5a2b8c','#b0499b'],workshop:['Workshop','#b2491b','#e3a33a']};
+var OCATS={strategy:'Strategy',marketing:'Marketing',finance:'Finance',operations:'Operations',consulting:'Consulting',product:'Product Mgmt',hr:'HR',general:'General Mgmt'};
+var OTYPES={case_competition:'Case Competition',hackathon:'Hackathon',quiz:'Quiz',live_project:'Live Project',internship:'Internship'};
+var LFC={electronics:'Electronics',id_cards:'ID Cards',wallets:'Wallets',keys:'Keys',books:'Books',clothing:'Clothing',accessories:'Accessories',others:'Others'};
+var MKC={books:['Books & Academic','#25467d','book'],electronics:['Electronics','#3a3f8f','spark'],furniture:['Furniture','#7a5130','box'],hostel:['Hostel Essentials','#1f6e73','home'],clothing:['Clothing','#8b3a62','tag'],sports:['Sports','#2e7a3f','trophy'],cycles:['Cycles','#a35a14','compass'],other:['Other','#4c5a70','grid']};
+var COND={new:'New',like_new:'Like New',good:'Good',used:'Used'};
+var ATYPE={midterm:['Midterm','red'],endterm:['End-term','red'],quiz:['Quiz','amber'],assignment:['Assignment','gold'],project:['Project','blue'],registration:['Registration','blue'],holiday:['Holiday','green']};
+var PST=['In Transit','Out for Delivery','Delivered to Campus','Ready at Collection Point','Collected'];
+var COURSES=[['ECO-101','Managerial Economics','Faculty A'],['ACC-101','Financial Accounting','Faculty B'],['MKT-101','Marketing Management','Faculty C'],['OB-101','Organisational Behaviour','Faculty D'],['QM-101','Business Statistics','Faculty E'],['OPS-101','Operations Management','Faculty F']];
+var SLOTS=[[9,0,10,30],[10,45,12,15],[14,0,15,30],[15,45,17,15]];
+var INTERESTS=['Finance','Marketing','Consulting','Strategy','Operations','Product','Analytics','HR','Entrepreneurship','Design','Public Speaking','Sports'];
+
+function seed(){
+  return {
+    v:3, day:dkey(Date.now()), logged:false, onboarded:false, role:'student',
+    user:{name:'Aarav Prasad',email:'aarav.p25@iimraipur.ac.in',program:'MBA',batch:'2026-28',section:'A',hostel:'Block C',interests:['Finance','Consulting'],team:true},
+    prefs:{announcements:true,events:true,opportunities:true,parcels:true,lost_found:true,academics:true,marketplace:true,messages:true,community:true},
+    tt:{'1-0':{status:'cancelled',note:'Faculty unavailable — make-up class to be announced'},'1-3':{status:'relocated',room:'Auditorium',note:'Combined session with Section B'}},
+    events:[
+      {id:'e1',title:'Valuation Bootcamp',cat:'workshop',start:at(0,18),end:at(0,20),venue:'Seminar Hall',org:'Finance Club',cap:60,reg:42,wait:0,me:'registered',checked:false,desc:'Hands-on DCF and trading comparables workshop. Bring a laptop with Excel installed. Seniors from the Finance Club will walk through a live valuation.'},
+      {id:'e5',title:'Case Interview Practice Night',cat:'club',start:at(1,20),end:at(1,22),venue:'Classroom 4',org:'Consulting Club',cap:40,reg:31,wait:0,me:null,desc:'Peer case practice in pairs with structured feedback rubrics. Ideal before the summer placement cycle.'},
+      {id:'e2',title:'Inter-section Football League',cat:'sports',start:at(2,17),end:at(2,19,30),venue:'Sports Ground',org:'Sports Committee',cap:64,reg:64,wait:5,me:null,desc:'Round-robin league between sections, teams of seven. Registration is full, so new sign-ups join the waitlist.'},
+      {id:'e3',title:'Cultural Night: Open Mic',cat:'cultural',start:at(4,19,30),end:at(4,22,30),venue:'Open Air Theatre',org:'Cultural Committee',cap:null,reg:0,wait:0,me:null,desc:'Music, poetry and stand-up. Open to all, no registration needed.'},
+      {id:'e4',title:'Brand Strategy Masterclass',cat:'guest_lecture',start:at(5,15),end:at(5,16,30),venue:'Auditorium',org:'Marketing Club',cap:200,reg:121,wait:0,me:null,desc:'Guest session on building challenger brands in Indian FMCG.'},
+      {id:'e6',title:'Resume Review Sprint',cat:'placement',start:at(7,10),end:at(7,13),venue:'Placement Office',org:'Placement Committee',cap:80,reg:55,wait:0,me:null,desc:'Get your CV reviewed by second-year students before the placement season.'},
+      {id:'e7',title:'Research Methods Seminar',cat:'academic',start:at(9,11),end:at(9,12,30),venue:'Seminar Room 2',org:'Doctoral Programme',cap:null,reg:0,wait:0,me:null,desc:'Doctoral seminar on mixed-methods research design. All students welcome.'},
+      {id:'e8',title:'Annual Quiz Night',cat:'committee',start:at(-5,19),end:at(-5,21),venue:'Auditorium',org:'Quiz Club',cap:90,reg:90,wait:0,me:'registered',checked:true,desc:'General quiz in teams of three.'}
+    ],
+    opps:[
+      {id:'o1',title:'Acme Rural Growth Challenge',org:'Acme Consumer Goods',cat:'marketing',type:'case_competition',prize:'₹1,50,000 pool',team:'2–3',reg:Date.now()+2*D,sub:Date.now()+12*D,ok:true,saved:false,elig:'MBA students, all years',desc:'Design a go-to-market plan for a new FMCG product in tier-3 towns.'},
+      {id:'o2',title:'Northwind Strategy Sprint',org:'Northwind Consulting',cat:'consulting',type:'case_competition',prize:'₹2,00,000 + PPIs',team:'3',reg:Date.now()+6*D,sub:Date.now()+20*D,ok:true,saved:true,elig:'First and second-year MBA',desc:'Turnaround strategy for a mid-size logistics company facing margin pressure.'},
+      {id:'o3',title:'Contoso Bank Treasury Case',org:'Contoso Bank',cat:'finance',type:'case_competition',prize:'₹75,000',team:'2',reg:Date.now()+1*D-3*H,sub:Date.now()+9*D,ok:true,saved:false,elig:'Finance specialisation preferred',desc:'Optimise a bank’s liquidity buffer under new regulatory constraints.'},
+      {id:'o4',title:'Globex Product Teardown',org:'Globex Retail',cat:'product',type:'hackathon',prize:'Internship interviews',team:'1–3',reg:Date.now()+9*D,sub:Date.now()+16*D,ok:true,saved:false,elig:'Open to all',desc:'Propose a feature roadmap for a retail super-app.'},
+      {id:'o5',title:'Fabrikam Ops Excellence',org:'Fabrikam Motors',cat:'operations',type:'case_competition',prize:'₹1,00,000',team:'2–4',reg:Date.now()+14*D,sub:Date.now()+28*D,ok:true,saved:false,elig:'All MBA students',desc:'Reduce changeover time on an assembly line using lean tools.'},
+      {id:'o6',title:'Initech People Analytics Live Project',org:'Initech Labs',cat:'hr',type:'live_project',prize:'Stipend + certificate',team:'1',reg:Date.now()+4*D,sub:null,ok:false,saved:false,elig:'Second-year MBA',desc:'Six-week live project on attrition analytics. Submitted by a student; awaiting admin verification.'},
+      {id:'o7',title:'Tailspin Business Quiz',org:'Tailspin Media',cat:'general',type:'quiz',prize:'₹50,000',team:'2',reg:Date.now()+11*D,sub:null,ok:true,saved:false,elig:'All students',desc:'National-level business quiz with online prelims.'},
+      {id:'o8',title:'Wingtip Summer Strategy Challenge',org:'Wingtip Ventures',cat:'strategy',type:'case_competition',prize:'₹1,00,000',team:'3',reg:Date.now()-20*D,sub:Date.now()-5*D,ok:true,saved:false,elig:'MBA students',desc:'Last season’s competition.'}
+    ],
+    teams:[
+      {id:'t1',opp:'o1',name:'Team Rural Reach',owner:'Riya S.',members:['Riya S.','Kabir M.'],max:3,need:['Design','Research'],me:null,desc:'Strong on research; looking for someone who can design a sharp deck.'},
+      {id:'t2',opp:'o2',name:'Case Crackers',owner:'Ananya R.',members:['Ananya R.'],max:3,need:['Consulting','Analytics'],me:null,desc:'Two consulting-track first-years, aiming for the finals.'}
+    ],
+    people:[
+      {name:'Ishaan T.',batch:'2026-28',spec:'Finance & Strategy',int:['Finance','Analytics']},
+      {name:'Meera J.',batch:'2026-28',spec:'Marketing',int:['Marketing','Design']},
+      {name:'Dev K.',batch:'2025-27',spec:'Operations',int:['Operations','Consulting']},
+      {name:'Sana A.',batch:'2026-28',spec:'Product',int:['Product','Analytics','Design']}
+    ],
+    exams:[
+      {id:'a1',title:'Managerial Economics Quiz 2',type:'quiz',course:'ECO-101',t:at(3,9),loc:'CR-1'},
+      {id:'a2',title:'Accounting Assignment 3 due',type:'assignment',course:'ACC-101',t:at(5,23,59),loc:'LMS'},
+      {id:'a6',title:'Elective bidding closes',type:'registration',course:null,t:at(6,17),loc:'Online'},
+      {id:'a3',title:'Midterm: Managerial Economics',type:'midterm',course:'ECO-101',t:at(10,10),loc:'Exam Hall'},
+      {id:'a4',title:'Midterm: Financial Accounting',type:'midterm',course:'ACC-101',t:at(11,10),loc:'Exam Hall'},
+      {id:'a5',title:'Marketing group project submission',type:'project',course:'MKT-101',t:at(12,23,59),loc:'LMS'},
+      {id:'a7',title:'Institute holiday',type:'holiday',course:null,t:at(15,0),loc:null},
+      {id:'a8',title:'End-term examinations begin',type:'endterm',course:null,t:at(25,10),loc:'Exam Hall'}
+    ],
+    reminders:{},
+    parcels:[
+      {id:'p1',item:'Headphones',courier:'Blue Dart',track:'BD77812309',sender:'Electronics store',st:3,otp:'482913',arrived:at(0,14),exp:null},
+      {id:'p2',item:'Books',courier:'Delhivery',track:'DL550219871',sender:'Online bookstore',st:0,otp:null,arrived:null,exp:at(2,12)},
+      {id:'p3',item:'Shoes',courier:'Ekart',track:'EK90311',sender:'Sports retailer',st:4,otp:null,arrived:at(-6,11),exp:null}
+    ],
+    deskParcels:[
+      {id:'d1',student:'Riya S.',courier:'DTDC',track:'DT11829',st:2},
+      {id:'d2',student:'Kabir M.',courier:'India Post',track:'EP2291IN',st:3,otp:'771204'},
+      {id:'d3',student:'Ishaan T.',courier:'Amazon Shipping',track:'AMZ8812',st:3,otp:'309188',old:true}
+    ],
+    lf:[
+      {id:'f1',kind:'found',title:'Set of keys with blue keychain',cat:'keys',loc:'Mess hall',t:Date.now()-2*D,desc:'Three keys on a blue ring. Describe the keychain to claim.',by:'Kabir M.',status:'open'},
+      {id:'f2',kind:'found',title:'Grey hoodie',cat:'clothing',loc:'Classroom 4',t:Date.now()-3*D,desc:'Left behind after the evening session.',by:'Meera J.',status:'open'},
+      {id:'f3',kind:'lost',title:'Black wireless earbuds case',cat:'electronics',loc:'Library reading room',t:Date.now()-1*D,desc:'Matte black case with a small scratch on the lid.',by:'Sana A.',status:'open'},
+      {id:'f4',kind:'lost',title:'Brown leather wallet',cat:'wallets',loc:'Sports ground',t:Date.now()-5*H,desc:'Brown bifold. Please message me; don’t post card details.',by:'Dev K.',status:'open'},
+      {id:'f5',kind:'found',title:'Steel water bottle',cat:'accessories',loc:'Gym',t:Date.now()-4*D,desc:'Silver bottle with a sticker.',by:'Riya S.',status:'resolved'},
+      {id:'f6',kind:'found',title:'Scientific calculator',cat:'electronics',loc:'Exam Hall',t:Date.now()-6*H,desc:'Found after the quiz.',by:'Ishaan T.',status:'open'}
+    ],
+    claims:[],
+    listings:[
+      {id:'l1',title:'Corporate Finance textbook',cat:'books',type:'sell',price:650,neg:true,cond:'like_new',seller:'Rohan K.',sbatch:'2025-27',t:Date.now()-2*H,status:'available',wish:false,desc:'Lightly highlighted, no torn pages. Latest edition.'},
+      {id:'l2',title:'Hybrid cycle with lock',cat:'cycles',type:'sell',price:4500,neg:true,cond:'used',seller:'Rohan K.',sbatch:'2025-27',t:Date.now()-5*H,status:'available',wish:true,desc:'Great for getting around campus. New tyres last semester.'},
+      {id:'l3',title:'Room cooler',cat:'hostel',type:'giveaway',price:0,neg:false,cond:'used',seller:'Nikhil P.',sbatch:'2025-27',t:Date.now()-9*H,status:'available',wish:false,desc:'Moving out — free to whoever picks it up first.'},
+      {id:'l4',title:'Scientific calculator',cat:'electronics',type:'sell',price:700,neg:false,cond:'good',seller:'Priya V.',sbatch:'2026-28',t:Date.now()-26*H,status:'available',wish:false,desc:'Works perfectly. Check your course rules for exam use.'},
+      {id:'l5',title:'Badminton racquet pair',cat:'sports',type:'exchange',price:0,neg:false,cond:'good',seller:'Arjun B.',sbatch:'2026-28',t:Date.now()-40*H,status:'available',wish:false,desc:'Will exchange for a cricket bat.'},
+      {id:'l6',title:'Study table lamp',cat:'hostel',type:'sell',price:400,neg:false,cond:'good',seller:'Priya V.',sbatch:'2026-28',t:Date.now()-60*H,status:'available',wish:false,desc:'LED lamp with three brightness levels.'},
+      {id:'l7',title:'Mini fridge',cat:'furniture',type:'sell',price:3200,neg:true,cond:'good',seller:'Nikhil P.',sbatch:'2025-27',t:Date.now()-80*H,status:'available',wish:false,desc:'Compact, fits under a desk.'},
+      {id:'l8',title:'Formal blazer (size 40)',cat:'clothing',type:'sell',price:1800,neg:true,cond:'like_new',seller:'Arjun B.',sbatch:'2026-28',t:Date.now()-100*H,status:'sold',wish:false,desc:'Worn twice.'}
+    ],
+    convos:[
+      {id:'c1',with:'Rohan K.',ctx:'Hybrid cycle with lock',unread:1,msgs:[{me:true,x:'Hi! Is the cycle still available?',t:Date.now()-3*H},{me:false,x:'Yes it is. You can check it out near Block A after 6 pm.',t:Date.now()-2*H}]},
+      {id:'c2',with:'Riya S.',ctx:'Team Rural Reach',unread:0,msgs:[{me:false,x:'Saw you’re into consulting. Want to join us for the Acme challenge?',t:Date.now()-26*H},{me:true,x:'Sounds interesting, let me check the brief.',t:Date.now()-25*H}]}
+    ],
+    notifs:[
+      {id:'n1',type:'academics',title:'Class cancelled: ECO-101 Managerial Economics',body:'Tomorrow, 9:00 am · Faculty unavailable — make-up class to be announced',t:Date.now()-2*H,read:false,pr:'urgent',go:'timetable'},
+      {id:'n2',type:'parcels',title:'Your parcel is ready for collection',body:'Blue Dart · BD77812309. Show your OTP at the Main Gate Security Office.',t:Date.now()-5*H,read:false,pr:'important',go:'parcels'},
+      {id:'n3',type:'opportunities',title:'Closing soon: Acme Rural Growth Challenge',body:'Registration closes in 2 days.',t:Date.now()-8*H,read:false,pr:'normal',go:'competitions'},
+      {id:'n4',type:'events',title:'New event: Brand Strategy Masterclass',body:'Auditorium · Marketing Club',t:Date.now()-26*H,read:true,pr:'normal',go:'events'},
+      {id:'n5',type:'community',title:'Meera J. replied to your post',body:'“Try the print shop near the main gate, it’s open late.”',t:Date.now()-30*H,read:true,pr:'normal',go:'community'}
+    ],
+    ann:[
+      {id:'an1',title:'Welcome to Campus360',body:'Campus360 brings classes, exams, events, competitions, parcels, lost & found, the marketplace and your batch community into one place.',cat:'general',pr:'normal',pin:true,official:false,by:'Student Council',t:Date.now()-3*H},
+      {id:'an2',title:'Midterm seating plan published',body:'Seating plans for next week’s midterms are now available in the Exams tab. Carry your ID card to the exam hall.',cat:'academic',pr:'urgent',pin:false,official:true,by:'Academic Office',t:Date.now()-1*H},
+      {id:'an3',title:'Pre-placement talk schedule',body:'Pre-placement talks run through next week. Check the Events tab for timings and register to attend.',cat:'placement',pr:'important',pin:false,official:false,by:'Placement Committee',t:Date.now()-26*H},
+      {id:'an4',title:'Library hours extended during exams',body:'The library will stay open until 2:00 am during the midterm week.',cat:'administrative',pr:'normal',pin:false,official:true,by:'Library',t:Date.now()-50*H}
+    ],
+    boards:[
+      {id:'b1',name:'Batch 2026–28',kind:'Your batch',desc:'Private board for your batch'},
+      {id:'b2',name:'Academic Doubts',kind:'Campus boards',desc:'Ask and answer course questions'},
+      {id:'b3',name:'Find Teammates',kind:'Campus boards',desc:'Looking for a team? Post here'},
+      {id:'b4',name:'Campus Recommendations',kind:'Campus boards',desc:'Food, services, travel and more'},
+      {id:'b5',name:'Finance & Investing',kind:'Interest groups',desc:'Markets, valuation and careers',joined:true},
+      {id:'b6',name:'Consulting & Strategy',kind:'Interest groups',desc:'Case prep and guesstimates',joined:false},
+      {id:'b7',name:'Product & Tech',kind:'Interest groups',desc:'PM, tech and startups',joined:false},
+      {id:'b8',name:'Sports & Fitness',kind:'Interest groups',desc:'Games, runs and fitness buddies',joined:false}
+    ],
+    posts:[
+      {id:'q1',board:'b2',title:'Is surge pricing third-degree price discrimination?',body:'Confused after today’s ECO-101 class. Different prices by time, not by customer group?',tag:'Academic doubt',by:'Sana A.',t:Date.now()-4*H,votes:12,voted:false,replies:[{by:'Ishaan T.',x:'Closer to peak-load pricing. Price varies with demand at a point in time, not with who the customer is.',t:Date.now()-3*H}]},
+      {id:'q2',board:'b3',title:'Need a third teammate for the Acme marketing case',body:'Two first-years, strong on research. Looking for someone good with slides.',tag:'Find teammates',by:'Riya S.',t:Date.now()-9*H,votes:7,voted:false,replies:[]},
+      {id:'q3',board:'b4',title:'Best place to get documents printed late at night?',body:'Need to print a report for a morning submission.',tag:'Recommendation',by:'Aarav Prasad',t:Date.now()-32*H,votes:5,voted:true,replies:[{by:'Meera J.',x:'Try the print shop near the main gate, it’s open late.',t:Date.now()-30*H}]},
+      {id:'q4',board:'b1',title:'Section A study group for midterms?',body:'Planning daily 8–10 pm sessions in the library till the midterms. Anyone in?',tag:'General',by:'Kabir M.',t:Date.now()-6*H,votes:18,voted:false,replies:[{by:'Priya V.',x:'In! Can we start with Accounting?',t:Date.now()-5*H}]},
+      {id:'q5',board:'b5',title:'Good resources for learning DCF quickly?',body:'Before the Valuation Bootcamp tonight.',tag:'Peer help',by:'Dev K.',t:Date.now()-12*H,votes:9,voted:false,replies:[]}
+    ],
+    reports:[
+      {id:'r1',what:'Marketplace listing',target:'Mini fridge',reason:'Misleading information',by:'Anonymous',t:Date.now()-3*H,status:'open'},
+      {id:'r2',what:'Community post',target:'“Selling assignment solutions”',reason:'Spam or scam',by:'Anonymous',t:Date.now()-20*H,status:'open'}
+    ],
+    ui:{pTab:'active',evTab:'upcoming',evCat:'all',opTab:'open',opCat:'all',opView:'list',ttView:'day',ttDay:'0',calType:'all',lfTab:'found',lfCat:'all',mkTab:'browse',mkCat:'all',mkSort:'new',annCat:'all',ntTab:'all',adTab:'overview',convo:'c1',board:null,collapsed:false,loginStep:'email',welcome:true}
+  };
+}
+var KEY='campus360-prototype';
+var S;
+try{S=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){S=null;}
+if(!S||S.v!==3||S.day!==dkey(Date.now())){var keep=S&&S.logged;S=seed();if(keep){S.logged=true;S.onboarded=true;}}
+var M=null; // modal
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* sessions generated relative to today */
+function sessions(from,to){
+  var out=[];
+  for(var off=from;off<=to;off++){
+    var w=dow(off); if(w===0||w===6) continue;
+    SLOTS.forEach(function(sl,i){
+      var c=COURSES[((off+100)*2+i)%6], id=off+'-'+i, o=S.tt[id]||{};
+      out.push({id:id,off:off,code:c[0],name:c[1],fac:c[2],start:at(off,sl[0],sl[1]),end:at(off,sl[2],sl[3]),room:o.room||('CR-'+(i+1)),origRoom:o.room?('CR-'+(i+1)):null,status:o.status||'scheduled',note:o.note||null});
+    });
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------- helpers */
+function badgeOfficial(a){return a.official?'<span class="badge dark">'+I('shield','sm')+' Official</span>':'';}
+function seg(key,opts){return '<div class="seg" role="tablist">'+opts.map(function(o){return '<button role="tab" aria-selected="'+(S.ui[key]===o[0])+'" class="'+(S.ui[key]===o[0]?'on':'')+'" data-a="set" data-k="'+key+'" data-v="'+o[0]+'">'+o[1]+(o[2]?'<span class="n">'+o[2]+'</span>':'')+'</button>';}).join('')+'</div>';}
+function chips(key,opts){return '<div class="chips">'+opts.map(function(o){return '<button class="chip '+(S.ui[key]===o[0]?'on':'')+'" data-a="set" data-k="'+key+'" data-v="'+o[0]+'">'+o[1]+'</button>';}).join('')+'</div>';}
+function ph(title,sub,actions){return '<div class="ph"><div><h1>'+title+'</h1>'+(sub?'<p>'+sub+'</p>':'')+'</div>'+(actions?'<div class="row">'+actions+'</div>':'')+'</div>';}
+function empty(t,d,act){return '<div class="empty"><b>'+t+'</b>'+(d||'')+(act?'<div style="margin-top:14px">'+act+'</div>':'')+'</div>';}
+function evArt(e){var c=CATS[e.cat];return 'background:linear-gradient(135deg,'+c[1]+','+c[2]+')';}
+function tileArt(cat){var c=MKC[cat];return 'background:linear-gradient(140deg,'+c[1]+','+c[1]+'cc 60%,'+c[1]+'88)';}
+function qr(str,size){
+  var h=2166136261;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  function r(){h^=h<<13;h^=h>>>17;h^=h<<5;return (h>>>0)/4294967296;}
+  var n=25,cells='';
+  function fin(x,y){return '<rect x="'+x+'" y="'+y+'" width="7" height="7" fill="#0b1a33"/><rect x="'+(x+1)+'" y="'+(y+1)+'" width="5" height="5" fill="#fff"/><rect x="'+(x+2)+'" y="'+(y+2)+'" width="3" height="3" fill="#0b1a33"/>';}
+  for(var y=0;y<n;y++)for(var x=0;x<n;x++){var inF=(x<8&&y<8)||(x>n-9&&y<8)||(x<8&&y>n-9);if(!inF&&r()>.52)cells+='<rect x="'+x+'" y="'+y+'" width="1" height="1"/>';}
+  return '<svg width="'+size+'" height="'+size+'" viewBox="-1 -1 '+(n+2)+' '+(n+2)+'" shape-rendering="crispEdges" style="background:#fff;border-radius:10px" role="img" aria-label="QR code"><g fill="#0b1a33">'+cells+'</g>'+fin(0,0)+fin(n-7,0)+fin(0,n-7)+'</svg>';
+}
+function toast(msg){var z=document.getElementById('toasts');var t=document.createElement('div');t.className='toast';t.innerHTML=I('check')+esc(msg);z.appendChild(t);setTimeout(function(){t.remove();},3200);}
+function notify(n){n.id=uid();n.t=Date.now();n.read=false;var pref=S.prefs[n.type];if(n.pr==='urgent'||pref!==false)S.notifs.unshift(n);}
+function unread(){return S.notifs.filter(function(n){return !n.read;}).length;}
+function unreadMsgs(){return S.convos.reduce(function(a,c){return a+(c.unread||0);},0);}
+function evStatus(e){return e.me;}
+
+/* ---------------------------------------------------------------- navigation */
+var NAV=[['home','Home','home'],['timetable','Timetable','clock'],['calendar','Exams & Calendar','cal'],['events','Events','spark'],['competitions','Competitions','trophy'],['parcels','Parcels','box'],['lost-found','Lost & Found','compass'],['market','Buy & Sell','bag'],['community','Community','users'],['messages','Messages','chat'],['announcements','Announcements','mega']];
+var VIEWS=NAV.map(function(n){return n[0];}).concat(['notifications','profile','admin']);
+function view(){var h=(location.hash||'').slice(1);return VIEWS.indexOf(h)>=0?h:'home';}
+
+function shell(){
+  var v=view(), admin=S.role==='admin';
+  var side='<aside class="side"><div class="brand">'+logo(34)+'<div><b>Campus<span>360</span></b><small>IIM Raipur</small></div></div><nav class="nav" aria-label="Main">'+
+    NAV.map(function(n){var p=n[0]==='messages'&&unreadMsgs()?'<span class="pill">'+unreadMsgs()+'</span>':'';return '<a href="#'+n[0]+'" class="'+(v===n[0]?'on':'')+'" title="'+n[1]+'">'+I(n[2])+'<span class="l">'+n[1]+'</span>'+p+'</a>';}).join('')+
+    (admin?'<div class="cap">Manage</div><a href="#admin" class="'+(v==='admin'?'on':'')+'" title="Admin panel">'+I('shield')+'<span class="l">Admin panel</span></a>':'')+
+    '</nav><div class="foot nav"><a href="#profile" class="'+(v==='profile'?'on':'')+'" title="Profile & settings">'+I('gear')+'<span class="l">Profile & settings</span></a><button data-a="collapse" title="Collapse sidebar">'+I('chevs')+'<span class="l" style="font-weight:500">'+(S.ui.collapsed?'':'Collapse')+'</span></button></div></aside>';
+  var top='<header class="top"><div class="in"><a href="#home" class="mbrand">'+logo(28)+'<span style="color:var(--ink)">Campus<span>360</span></span></a>'+
+    '<button class="sbtn" data-a="search" aria-label="Search">'+I('search')+'<span class="t">Search events, competitions, items…</span><kbd>⌘K</kbd></button>'+
+    '<div class="row" style="gap:4px;margin-left:auto">'+
+    '<button class="iconbtn" data-a="role" title="Switch role (prototype)" aria-label="Switch role">'+I(admin?'shield':'user')+'</button>'+
+    '<a class="iconbtn" href="#notifications" aria-label="Notifications">'+I('bell')+(unread()?'<span class="dot">'+unread()+'</span>':'')+'</a>'+
+    '<a href="#profile" class="av" aria-label="Profile">'+initials(S.user.name)+'</a></div></div></header>';
+  var bn='<nav class="bnav" aria-label="Mobile">'+[['home','Home','home'],['events','Events','spark'],['timetable','Classes','book'],['market','Market','bag']].map(function(n){return '<a href="#'+n[0]+'" class="'+(v===n[0]?'on':'')+'">'+I(n[2])+n[1]+'</a>';}).join('')+'<button data-a="more" class="'+(['home','events','timetable','market'].indexOf(v)<0?'on':'')+'">'+I('grid')+'More</button></nav>';
+  return '<div class="shell '+(S.ui.collapsed?'col':'')+'">'+side+'<div>'+top+'<main><div class="wrap">'+VIEW[v]()+'</div></main></div></div>'+bn+(M?modal():'');
+}
+function logo(s){return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#0b1a33"/><circle cx="32" cy="32" r="17" fill="none" stroke="#e2c062" stroke-width="4" stroke-dasharray="80 27" stroke-linecap="round" transform="rotate(-50 32 32)"/><path d="M24 34l6 6 11-14" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+
+/* ---------------------------------------------------------------- views */
+var VIEW={};
+
+VIEW.home=function(){
+  var now=Date.now(), today=sessions(0,1).filter(function(s){return s.off===0;});
+  var upcoming=sessions(0,3).filter(function(s){return s.status!=='cancelled'&&s.end>now;});
+  var live=upcoming.find(function(s){return s.start<=now;}), next=upcoming.find(function(s){return s.start>now;}), feat=live||next;
+  var changes=sessions(0,1).filter(function(s){return s.status!=='scheduled';});
+  var exams=S.exams.filter(function(e){return e.t>now&&['quiz','midterm','endterm'].indexOf(e.type)>=0;});
+  var dls=S.exams.filter(function(e){return e.t>now&&['assignment','project','registration'].indexOf(e.type)>=0;}).slice(0,2);
+  var closing=S.opps.filter(function(o){return o.reg>now&&o.reg-now<7*D&&o.ok;}).sort(function(a,b){return a.reg-b.reg;}).slice(0,3);
+  var evToday=S.events.filter(function(e){return dkey(e.start)===dkey(now);});
+  var upEv=S.events.filter(function(e){return e.start>now;}).sort(function(a,b){return a.start-b.start;}).slice(0,6);
+  var parcels=S.parcels.filter(function(p){return p.st<4;});
+  var urgent=S.ann.filter(function(a){return a.pr==='urgent';});
+  var nClass=today.filter(function(s){return s.status!=='cancelled';}).length;
+  var g=istHour(), greet=g<5?'Good evening':g<12?'Good morning':g<17?'Good afternoon':'Good evening';
+  var h='<section class="hero"><div class="d">'+fLong(now)+'</div><h1>'+greet+', '+esc(S.user.name.split(' ')[0])+'</h1><div class="row">'+
+    '<span class="hp">'+nClass+' class'+(nClass===1?'':'es')+' today</span><span class="hp">'+evToday.length+' event'+(evToday.length===1?'':'s')+' today</span>'+
+    (exams[0]?'<span class="hp g">Next exam '+rel(exams[0].t)+'</span>':'')+(parcels.some(function(p){return p.st===3;})?'<span class="hp g">Parcel ready to collect</span>':'')+'</div></section>';
+  var out='<div class="stack" style="gap:20px">'+h;
+  if(S.ui.welcome)out+='<div class="card pad" style="background:linear-gradient(90deg,var(--gold-soft),#fff);border-color:#efe0b3;position:relative"><button data-a="dismiss" class="iconbtn" style="position:absolute;right:6px;top:6px" aria-label="Dismiss">'+I('x')+'</button><b>Everything you need today is on this page.</b><div class="muted" style="margin-top:4px;padding-right:30px">Use the shortcuts for each module, the search bar (⌘K) for anything, and the bell for alerts. Try switching to the <b>admin view</b> with the '+I('user','sm')+' button at the top.</div></div>';
+  urgent.forEach(function(a){out+='<button class="urgent" data-a="go" data-v="announcements">'+I('alert')+'<div><div class="row sb">Urgent: '+esc(a.title)+' '+badgeOfficial(a)+'</div><div class="small clamp2" style="opacity:.85;margin-top:2px">'+esc(a.body)+'</div></div></button>';});
+  out+='<div class="short">'+[['timetable','Timetable','clock','#e6f0fb','#2463a8'],['events','Events','spark','#fdeceb','#c2362f'],['competitions','Competitions','trophy','#f8f0d9','#8a6512'],['parcels','Parcels','box','#fff1e4','#b2491b'],['lost-found','Lost & Found','compass','#e4f4ec','#1d8559'],['market','Buy & Sell','bag','#efeafb','#5a2b8c'],['calendar','Exams','cal','#fdeceb','#c2362f']].map(function(s){return '<a href="#'+s[0]+'"><span class="i" style="background:'+s[3]+';color:'+s[4]+'">'+I(s[2],'lg')+'</span>'+s[1]+'</a>';}).join('')+'</div>';
+  out+='<div class="main-side"><div class="stack" style="gap:22px">';
+  // classes
+  out+='<section><div class="sec"><h2>'+I('book')+'Today’s classes</h2><a class="link" href="#timetable">Full timetable →</a></div><div class="card" style="overflow:hidden">';
+  if(feat)out+='<div class="now"><span class="k '+(live?'live':'')+'">'+(live?'NOW':'NEXT')+'</span><div style="min-width:0;flex:1"><div class="b trunc">'+feat.name+' <span class="muted" style="font-weight:500">· '+feat.code+'</span></div><div class="small muted">'+(feat.off===0?'':fDay(feat.start)+', ')+fTime(feat.start)+' – '+fTime(feat.end)+' · '+feat.room+' · '+feat.fac+'</div></div>'+(live?'':'<span class="small b" style="color:var(--navy-3)">'+rel(feat.start)+'</span>')+'</div>';
+  if(!today.length)out+='<div class="pad muted">No classes today. Enjoy the break.</div>';
+  today.forEach(function(s){out+='<div class="li '+(s.end<now?'past':'')+'"><span class="t">'+fTime(s.start)+'</span><div style="flex:1;min-width:0"><div class="sb trunc '+(s.status==='cancelled'?'strike':'')+'">'+s.name+'</div><div class="xs muted">'+s.code+' · '+s.room+'</div></div>'+(s.status!=='scheduled'?'<span class="badge '+(s.status==='cancelled'?'red':'amber')+'">'+s.status+'</span>':'')+'</div>';});
+  if(changes.length)out+='<a href="#timetable" data-a="ttchanges" style="display:flex;gap:8px;align-items:center;padding:10px 16px;background:var(--amber-soft);color:var(--amber);font-size:12px;font-weight:700;border-top:1px solid #f2deae">'+I('alert','sm')+changes.length+' timetable change'+(changes.length>1?'s':'')+' today/tomorrow. View them.</a>';
+  out+='</div></section>';
+  // overview
+  out+='<section class="g2"><div class="card pad"><div class="sec"><h2>'+I('cal')+'Upcoming exams</h2><a class="link" href="#calendar">All →</a></div><div class="stack">'+exams.slice(0,3).map(function(e){return '<div class="between" style="align-items:flex-start"><div style="min-width:0"><span class="tag badge '+ATYPE[e.type][1]+'">'+ATYPE[e.type][0]+'</span><div class="sb" style="margin-top:4px">'+esc(e.title)+'</div><div class="xs muted">'+fDT(e.t)+'</div></div>'+cd(e.t)+'</div>';}).join('')+'</div></div>';
+  out+='<div class="card pad"><div class="sec"><h2>'+I('clock')+'Deadlines</h2></div><div class="stack">'+dls.map(function(e){return '<div class="between" style="align-items:flex-start"><div style="min-width:0"><div class="sb">'+esc(e.title)+'</div><div class="xs muted">'+ATYPE[e.type][0]+' · '+fDT(e.t)+'</div></div>'+cd(e.t)+'</div>';}).join('')+closing.map(function(o){return '<button class="between" style="align-items:flex-start;text-align:left" data-a="opp" data-id="'+o.id+'"><div style="min-width:0"><div class="sb">'+esc(o.title)+'</div><div class="xs muted">Registration closes</div></div>'+cd(o.reg)+'</button>';}).join('')+'</div></div></section>';
+  // events
+  out+='<section><div class="sec"><h2>'+I('spark')+'Upcoming events</h2><a class="link" href="#events">All events →</a></div><div class="hscroll">'+upEv.map(evCard).join('')+'</div></section>';
+  // opps
+  out+='<section><div class="sec"><h2>'+I('trophy')+'Trending competitions & opportunities</h2><a class="link" href="#competitions">Explore →</a></div><div class="g2">'+S.opps.filter(function(o){return o.reg>now&&o.ok;}).sort(function(a,b){return a.reg-b.reg;}).slice(0,4).map(oppCard).join('')+'</div></section>';
+  // market
+  out+='<section><div class="sec"><h2>'+I('bag')+'Fresh on the marketplace</h2><a class="link" href="#market">Browse →</a></div><div class="g3">'+S.listings.filter(function(l){return l.status!=='sold';}).slice(0,6).map(listCard).join('')+'</div></section>';
+  out+='</div><div class="stack" style="gap:18px">';
+  out+='<div class="card pad"><div class="sec"><h2>'+I('box')+'Your parcels</h2><a class="link" href="#parcels">Manage →</a></div><div class="stack" style="gap:8px">'+(parcels.length?parcels.map(function(p){return '<a href="#parcels" class="between" style="padding:10px 12px;border-radius:12px;background:'+(p.st===3?'var(--gold-soft)':'var(--bg)')+'"><div style="min-width:0"><div class="sb trunc">'+esc(p.item)+'</div><div class="xs muted trunc">'+esc(p.courier)+' · '+esc(p.track)+'</div></div><span class="badge '+(p.st===3?'gold':'')+'">'+PST[p.st]+'</span></a>';}).join(''):'<div class="muted small">No pending parcels.</div>')+'</div></div>';
+  out+='<div class="card pad"><div class="sec"><h2>'+I('mega')+'Announcements</h2><a class="link" href="#announcements">All →</a></div><div class="stack" style="gap:12px">'+S.ann.slice().sort(function(a,b){return (b.pin-a.pin)||(b.t-a.t);}).slice(0,4).map(function(a){return '<a href="#announcements"><div class="row" style="gap:6px">'+(a.pr!=='normal'?'<span style="width:7px;height:7px;border-radius:50%;background:'+(a.pr==='urgent'?'var(--red)':'var(--gold)')+'"></span>':'')+'<span class="sb">'+esc(a.title)+'</span></div><div class="row xs muted" style="margin-top:3px">'+esc(a.by)+' · '+rel(a.t)+' '+badgeOfficial(a)+'</div></a>';}).join('')+'</div></div>';
+  out+='<div class="card pad"><div class="sec"><h2>'+I('bell')+'Notifications & reminders</h2><a class="link" href="#notifications">All →</a></div><div class="stack" style="gap:6px">'+
+    Object.keys(S.reminders).map(function(k){var r=S.reminders[k];return '<div class="row small" style="padding:8px 10px;border-radius:12px;background:var(--tint)">'+I('clock','sm')+'<span class="sb trunc" style="flex:1">'+esc(r.title)+'</span><span class="xs muted">'+r.when+'</span></div>';}).join('')+
+    S.notifs.filter(function(n){return !n.read;}).slice(0,4).map(function(n){return '<button data-a="openNotif" data-id="'+n.id+'" style="text-align:left;padding:8px 10px;border-radius:12px;background:'+(n.pr==='urgent'?'var(--red-soft)':'transparent')+'"><div class="sb small clamp2" style="color:'+(n.pr==='urgent'?'#7d1d18':'inherit')+'">'+esc(n.title)+'</div><div class="xs muted">'+rel(n.t)+'</div></button>';}).join('')+(unread()?'':'<div class="muted small">You’re all caught up.</div>')+'</div></div>';
+  out+='<a href="#community" class="card" style="display:flex;align-items:center;gap:12px;padding:16px;background:var(--navy);color:#fff;border:0"><div style="flex:1"><div class="b">Your batch board</div><div class="xs" style="color:#9fb0cd">Ask doubts, find teammates, share tips</div></div><span style="color:var(--gold-2)">'+I('arrow')+'</span></a>';
+  out+='</div></div></div>';
+  return out;
+};
+
+function evCard(e){
+  var c=CATS[e.cat],past=(e.end||e.start)<Date.now(),full=e.cap&&e.reg>=e.cap;
+  return '<button class="card ev hov" data-a="event" data-id="'+e.id+'" style="'+(past?'opacity:.75':'')+'"><div class="art" style="'+evArt(e)+'"><div class="date"><small>'+fMon(e.start)+'</small><b>'+fDnum(e.start)+'</b></div>'+(e.me?'<span class="reg">'+I('check','sm')+(e.me==='waitlisted'?'Waitlisted':e.checked?'Attended':'Registered')+'</span>':'')+'</div><div class="body"><span class="tag" style="background:'+c[1]+'18;color:'+c[1]+';width:fit-content">'+c[0]+'</span><h3>'+esc(e.title)+'</h3><div class="meta"><span>'+I('clock','sm')+fDay(e.start)+' · '+fTime(e.start)+'</span><span>'+I('pin','sm')+esc(e.venue)+'</span>'+(e.cap&&!past?'<span style="'+(full?'color:var(--amber);font-weight:700':'')+'">'+I('users','sm')+(full?'Full · '+e.wait+' waitlisted':(e.cap-e.reg)+' of '+e.cap+' seats left')+'</span>':'')+(!e.cap&&!past?'<span>'+I('users','sm')+'Open to all, no registration</span>':'')+'</div></div></button>';
+}
+function oppCard(o){
+  var now=Date.now(),done=o.reg&&o.reg<now;
+  return '<div class="card pad hov" style="position:relative;display:flex;flex-direction:column;gap:6px"><button data-a="save" data-id="'+o.id+'" style="position:absolute;right:12px;top:12px;color:'+(o.saved?'var(--gold)':'var(--faint)')+'" aria-label="Bookmark">'+I('bookmark',o.saved?'':'')+'</button>'+
+  '<button data-a="opp" data-id="'+o.id+'" style="text-align:left;display:flex;flex-direction:column;gap:6px;flex:1"><div class="row" style="gap:6px;padding-right:28px"><span class="badge">'+OTYPES[o.type]+'</span><span class="badge blue">'+OCATS[o.cat]+'</span>'+(o.ok?'':'<span class="badge amber">Unverified</span>')+'</div><h3 style="font-size:15px">'+esc(o.title)+'</h3><div class="small muted">'+esc(o.org)+'</div><div class="between" style="margin-top:auto;padding-top:8px;align-items:flex-end"><div class="xs muted"><div class="sb" style="color:var(--ink)">'+esc(o.prize)+'</div>Team: '+esc(o.team)+'</div>'+(done?'<span class="badge">Closed</span>':cd(o.reg))+'</div></button></div>';
+}
+function listCard(l){
+  var c=MKC[l.cat],p=l.type==='giveaway'?'Free':l.type==='exchange'?'Exchange':rupees(l.price);
+  return '<div class="card hov" style="overflow:hidden;position:relative;'+(l.status==='sold'?'opacity:.65':'')+'"><button data-a="listing" data-id="'+l.id+'" style="display:block;width:100%;text-align:left"><div class="tile" style="'+tileArt(l.cat)+'">'+I(c[2])+'<div class="tl">'+(l.type==='giveaway'?'<span class="badge green">Free</span>':'')+(l.type==='exchange'?'<span class="badge blue">Swap</span>':'')+(l.status!=='available'?'<span class="badge">'+l.status+'</span>':'')+'</div></div><div style="padding:12px"><div class="sb trunc">'+esc(l.title)+'</div><div class="row" style="gap:6px;margin-top:2px"><b>'+p+'</b>'+(l.neg&&l.type==='sell'?'<span class="xs muted">Negotiable</span>':'')+'</div><div class="xs faint" style="margin-top:3px">'+COND[l.cond]+' · '+rel(l.t)+'</div></div></button>'+(l.seller!==S.user.name?'<button class="heart '+(l.wish?'on':'')+'" data-a="wish" data-id="'+l.id+'" aria-label="Wishlist">'+I('heart','sm')+'</button>':'')+'</div>';
+}
+
+VIEW.timetable=function(){
+  var v=S.ui.ttView,sel=Number(S.ui.ttDay),now=Date.now();
+  var out=ph('Timetable','Batch '+S.user.batch+' · Section '+S.user.section+' · Times in IST');
+  out+='<div class="toolbar">'+seg('ttView',[['day','Day'],['week','Week'],['changes','Changes']])+'</div>';
+  if(v==='day'){
+    var w0=sel-((dow(sel)+6)%7);
+    out+='<div class="daystrip">';
+    for(var i=0;i<7;i++){var o=w0+i;out+='<button class="'+(o===sel?'on ':'')+(o===0?'today':'')+'" data-a="set" data-k="ttDay" data-v="'+o+'"><small>'+fm({weekday:'short'}).format(at(o,12))+'</small><b>'+fDnum(at(o,12))+'</b></button>';}
+    out+='</div><div class="stack">';
+    var list=sessions(sel,sel);
+    if(!list.length)out+=empty('No classes on '+fLong(at(sel,12)),'It’s the weekend. Check the week view for upcoming classes.');
+    list.forEach(function(s){var live=s.start<=now&&s.end>now&&s.status!=='cancelled';out+='<div class="card" style="display:flex;gap:16px;padding:14px 16px;'+(live?'box-shadow:0 0 0 2px var(--green);':'')+(s.end<now?'opacity:.55;':'')+(s.status==='cancelled'?'background:#fff8f7;':'')+'"><div style="width:74px;text-align:right;border-right:1px solid var(--line);padding-right:12px;flex-shrink:0"><div class="b">'+fTime(s.start)+'</div><div class="xs muted">'+fTime(s.end)+'</div></div><div style="flex:1;min-width:0"><div class="row" style="gap:6px">'+(live?'<span class="badge green">● Now</span>':'')+(s.status!=='scheduled'?'<span class="badge '+(s.status==='cancelled'?'red':'amber')+'">'+s.status+'</span>':'')+'</div><div class="b '+(s.status==='cancelled'?'strike':'')+'" style="font-size:15px;margin-top:2px">'+s.name+'</div><div class="row xs muted" style="gap:12px;margin-top:3px"><span>'+s.code+'</span><span class="row" style="gap:4px">'+I('pin','sm')+s.room+(s.origRoom?' <span class="strike faint">'+s.origRoom+'</span>':'')+'</span><span class="row" style="gap:4px">'+I('user','sm')+s.fac+'</span></div>'+(s.note?'<div class="small sb" style="color:var(--amber);margin-top:6px">'+esc(s.note)+'</div>':'')+'</div></div>';});
+    out+='</div>';
+  }else if(v==='week'){
+    var m=0-((dow(0)+6)%7);
+    out+='<div class="scrollx"><div class="week">';
+    for(var d=0;d<5;d++){var off=m+d;var l=sessions(off,off);out+='<div><div class="whd '+(off===0?'on':'')+'">'+fDay(at(off,12))+'</div><div class="stack" style="gap:8px">'+l.map(function(s){var live=s.start<=now&&s.end>now;return '<div class="wk '+(s.status==='cancelled'?'c':s.status!=='scheduled'?'ch':'')+(live?' live':'')+'"><div class="b" style="color:var(--navy-3)">'+fTime(s.start)+'</div><div class="sb clamp2 '+(s.status==='cancelled'?'strike':'')+'">'+s.name+'</div><div class="muted">'+s.room+'</div>'+(s.status!=='scheduled'?'<div class="b" style="color:var(--amber);text-transform:capitalize;margin-top:2px">'+s.status+'</div>':'')+'</div>';}).join('')+'</div></div>';}
+    out+='</div></div>';
+  }else{
+    var ch=sessions(0,14).filter(function(s){return s.status!=='scheduled';});
+    out+=ch.length?'<div class="stack">'+ch.map(function(s){return '<div class="card pad" style="display:flex;gap:12px">'+'<span style="color:'+(s.status==='cancelled'?'var(--red)':'var(--amber)')+'">'+I('alert')+'</span><div><span class="badge '+(s.status==='cancelled'?'red':'amber')+'">'+s.status+'</span><div class="b" style="margin-top:4px">'+s.code+' · '+s.name+'</div><div class="small muted">'+fDT(s.start)+' · '+s.room+(s.origRoom?' (was '+s.origRoom+')':'')+'</div>'+(s.note?'<div class="small sb" style="color:var(--amber);margin-top:4px">'+esc(s.note)+'</div>':'')+'</div></div>';}).join('')+'</div>':empty('No timetable changes in the next two weeks');
+  }
+  return out;
+};
+
+VIEW.calendar=function(){
+  var now=Date.now(),t=S.ui.calType;
+  var items=S.exams.filter(function(e){return t==='all'||(t==='exams'&&['quiz','midterm','endterm'].indexOf(e.type)>=0)||(t==='deadlines'&&['assignment','project','registration'].indexOf(e.type)>=0)||(t==='holidays'&&e.type==='holiday');}).sort(function(a,b){return a.t-b.t;});
+  var next=S.exams.filter(function(e){return ['midterm','endterm','quiz'].indexOf(e.type)>=0&&e.t>now;}).sort(function(a,b){return a.t-b.t;})[0];
+  var out=ph('Exams & Academic Calendar','Exams, quizzes, deadlines, registrations and holidays for '+S.user.batch+' · Section '+S.user.section);
+  if(next){var ms=next.t-now;out+='<div class="banner" style="background:linear-gradient(120deg,#a8282a,#d0504a);margin-bottom:18px;display:flex;flex-wrap:wrap;gap:16px;align-items:center"><div style="flex:1;min-width:200px"><div class="xs b" style="letter-spacing:.1em;opacity:.8">NEXT EXAM</div><div class="b" style="font-size:19px">'+esc(next.title)+'</div><div class="small" style="opacity:.85">'+fDT(next.t)+(next.loc?' · '+esc(next.loc):'')+'</div></div><div class="row" style="gap:8px">'+[[Math.floor(ms/D),'days'],[Math.floor(ms%D/H),'hrs'],[Math.floor(ms%H/60000),'min']].map(function(x){return '<div style="width:62px;text-align:center;background:rgba(255,255,255,.16);border-radius:12px;padding:8px 0"><div class="b num" style="font-size:24px">'+x[0]+'</div><div class="xs" style="opacity:.8">'+x[1]+'</div></div>';}).join('')+'</div></div>';}
+  out+=chips('calType',[['all','Everything'],['exams','Exams & quizzes'],['deadlines','Deadlines'],['holidays','Holidays']]);
+  out+='<div class="stack">'+items.map(function(e){var a=ATYPE[e.type],past=e.t<now,r=S.reminders['a'+e.id];return '<div class="card" style="display:flex;flex-wrap:wrap;gap:14px;padding:14px 16px;align-items:center;'+(past?'opacity:.55':'')+'"><div style="width:52px;text-align:center"><div class="xs b" style="color:var(--red)">'+fm({weekday:'short'}).format(e.t).toUpperCase()+'</div><div class="b" style="font-size:24px">'+fDnum(e.t)+'</div><div class="xs muted">'+fm({month:'short'}).format(e.t)+'</div></div><div style="flex:1;min-width:180px"><div class="row" style="gap:6px"><span class="tag badge '+a[1]+'">'+a[0]+'</span>'+(e.course?'<span class="badge">'+e.course+'</span>':'')+'</div><div class="b" style="margin-top:4px">'+esc(e.title)+'</div><div class="xs muted">'+fDT(e.t)+(e.loc?' · '+esc(e.loc):'')+'</div></div>'+(past?'':'<div class="row">'+cd(e.t)+'<button class="btn sm '+(r?'soft':'out')+'" data-a="remind" data-id="a'+e.id+'" data-title="'+esc(e.title)+'">'+I(r?'check':'bell','sm')+(r?'Reminder set':'Remind me')+'</button></div>')+'</div>';}).join('')+'</div>';
+  return out;
+};
+
+VIEW.events=function(){
+  var now=Date.now(),tab=S.ui.evTab,cat=S.ui.evCat;
+  var list=S.events.filter(function(e){var past=(e.end||e.start)<now;if(tab==='upcoming'&&past)return false;if(tab==='past'&&!past)return false;if(tab==='mine'&&!e.me)return false;return cat==='all'||e.cat===cat;}).sort(function(a,b){return tab==='past'?b.start-a.start:a.start-b.start;});
+  var out=ph('Events','Everything happening on campus. Register, get reminders and check in by QR.',S.role==='admin'?'<button class="btn gold" data-a="newEvent">'+I('plus')+'Create event</button>':'');
+  out+='<div class="toolbar">'+seg('evTab',[['upcoming','Upcoming'],['past','Completed'],['mine','My events']])+'</div>';
+  out+=chips('evCat',[['all','All']].concat(Object.keys(CATS).map(function(k){return [k,CATS[k][0]];})));
+  out+=list.length?'<div class="g3">'+list.map(evCard).join('')+'</div>':empty('No events here','Try another category.');
+  return out;
+};
+
+VIEW.competitions=function(){
+  var now=Date.now(),tab=S.ui.opTab,cat=S.ui.opCat;
+  var out=ph('Competitions & Opportunities','Case competitions, hackathons, quizzes, live projects and internships.','<button class="btn out" data-a="set" data-k="opView" data-v="'+(S.ui.opView==='people'?'list':'people')+'">'+I('users')+(S.ui.opView==='people'?'Back to competitions':'Find teammates')+'</button><button class="btn gold" data-a="newOpp">'+I('plus')+'Submit</button>');
+  if(S.ui.opView==='people'){
+    out+='<div class="sec"><h2>'+I('users')+'Open teams</h2></div><div class="g2" style="margin-bottom:22px">'+S.teams.map(teamCard).join('')+'</div>';
+    out+='<div class="sec"><h2>'+I('user')+'Students open to joining teams</h2></div><div class="g4">'+S.people.map(function(p){return '<div class="card pad stack" style="gap:8px"><div class="row"><span class="av">'+initials(p.name)+'</span><div><div class="b">'+p.name+'</div><div class="xs muted">'+p.batch+' · '+p.spec+'</div></div></div><div class="row" style="gap:4px">'+p.int.map(function(i){return '<span class="badge">'+i+'</span>';}).join('')+'</div><button class="btn sm out" data-a="dm" data-v="'+p.name+'">'+I('chat','sm')+'Message</button></div>';}).join('')+'</div>';
+    return out;
+  }
+  var list=S.opps.filter(function(o){var done=o.reg&&o.reg<now,closing=!done&&o.reg-now<3*D;if(tab==='saved')return o.saved;if(tab==='completed')return done;if(tab==='closing')return closing;return !done;}).filter(function(o){return cat==='all'||o.cat===cat;}).sort(function(a,b){return a.reg-b.reg;});
+  out+='<div class="toolbar">'+seg('opTab',[['open','Open'],['closing','Closing soon'],['completed','Completed'],['saved','Saved',S.opps.filter(function(o){return o.saved;}).length]])+'</div>';
+  out+=chips('opCat',[['all','All']].concat(Object.keys(OCATS).map(function(k){return [k,OCATS[k]];})));
+  out+=list.length?'<div class="g3">'+list.map(oppCard).join('')+'</div>':empty('Nothing here yet','Bookmark competitions to track them here.');
+  return out;
+};
+function teamCard(t){
+  var o=S.opps.find(function(x){return x.id===t.opp;})||{};
+  return '<div class="card pad stack" style="gap:8px"><div class="between"><div><div class="b">'+esc(t.name)+'</div><div class="xs" style="color:var(--navy-3)">'+esc(o.title||'')+'</div></div><span class="badge green">'+t.members.length+'/'+t.max+'</span></div><div class="small muted">'+esc(t.desc)+'</div><div class="row" style="gap:4px">'+t.need.map(function(n){return '<span class="badge blue">Needs '+n+'</span>';}).join('')+'</div><div class="row">'+(t.me==='requested'?'<span class="badge amber">Request pending</span>':t.me==='member'?'<span class="badge green">You’re in</span>':'<button class="btn sm" data-a="joinTeam" data-id="'+t.id+'">'+I('plus','sm')+'Request to join</button>')+'<button class="btn sm out" data-a="dm" data-v="'+t.owner+'">'+I('chat','sm')+'Ask '+t.owner.split(' ')[0]+'</button></div></div>';
+}
+
+VIEW.parcels=function(){
+  var tab=S.ui.pTab||'active',act=S.parcels.filter(function(p){return p.st<4;}),hist=S.parcels.filter(function(p){return p.st===4;});
+  var out=ph('Parcels','Register incoming deliveries and get notified when they reach the desk.','<button class="btn gold" data-a="newParcel">'+I('plus')+'Register parcel</button>');
+  out+='<div class="card" style="background:var(--navy);color:#fff;border:0;padding:14px 18px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:8px 24px"><span class="row">'+'<span style="color:var(--gold-2)">'+I('pin')+'</span>Collection point: <b>Main Gate Security Office</b></span><span class="row"><span style="color:var(--gold-2)">'+I('clock')+'</span>Timings: <b>9:00 am – 7:00 pm</b></span></div>';
+  out+='<div class="small muted" style="background:#e9edf4;border-radius:12px;padding:10px 12px;margin-bottom:16px">Statuses are updated by the campus parcel desk. This is not live courier tracking; use the courier’s own link for in-transit details.</div>';
+  out+='<div class="toolbar">'+seg('pTab',[['active','Active',act.length],['history','History']])+'</div>';
+  var list=tab==='active'?act:hist;
+  if(!list.length)return out+empty('No parcels here','Register a parcel so the desk can match it to you.');
+  out+='<div class="stack">'+list.map(function(p){var ready=p.st===3;return '<div class="card" style="overflow:hidden;'+(ready?'box-shadow:0 0 0 2px var(--gold-2)':'')+'"><div class="pad"><div class="between" style="align-items:flex-start"><div><div class="b" style="font-size:15px">'+esc(p.item)+'</div><div class="xs muted">'+esc(p.courier)+' · '+esc(p.track)+' · from '+esc(p.sender)+'</div>'+(p.exp&&p.st<3?'<div class="xs muted">Expected '+fDay(p.exp)+'</div>':'')+'</div><span class="badge '+(ready?'gold':p.st===4?'green':'')+'">'+PST[p.st]+'</span></div><div style="margin-top:14px"><div class="steps">'+PST.map(function(s,i){return '<span class="s '+(i<=p.st?'on':'')+'">'+(i<p.st||p.st===4?I('check','sm'):i+1)+'</span>'+(i<4?'<span class="ln '+(i<p.st?'on':'')+'"></span>':'');}).join('')+'</div><div class="steplbl">'+PST.map(function(s){return '<span>'+s+'</span>';}).join('')+'</div></div></div>'+
+    (ready?'<div class="otp">'+qr('parcel:'+p.id+':'+p.otp,112)+'<div><div class="xs b" style="letter-spacing:.1em;color:#7d5f10">COLLECTION OTP</div><div class="code">'+p.otp+'</div><div class="small muted">Show this code or QR at the desk. Don’t share it with anyone else.</div><div class="xs muted">Arrived '+rel(p.arrived)+'</div></div></div>':'')+'</div>';}).join('')+'</div>';
+  return out;
+};
+
+VIEW['lost-found']=function(){
+  var tab=S.ui.lfTab,cat=S.ui.lfCat;
+  var list=S.lf.filter(function(i){return (tab==='mine'?i.by===S.user.name:i.kind===tab)&&(cat==='all'||i.cat===cat);});
+  var out=ph('Lost & Found','Report lost or found items and reunite belongings with their owners.','<button class="btn out" data-a="newLF" data-v="lost">'+I('plus')+'I lost something</button><button class="btn gold" data-a="newLF" data-v="found">'+I('plus')+'I found something</button>');
+  out+='<div class="toolbar">'+seg('lfTab',[['found','Found items'],['lost','Lost items'],['mine','My reports']])+'</div>';
+  out+=chips('lfCat',[['all','All']].concat(Object.keys(LFC).map(function(k){return [k,LFC[k]];})));
+  out+=list.length?'<div class="g4 keep">'+list.map(function(i){return '<button class="card hov" style="overflow:hidden;text-align:left" data-a="lf" data-id="'+i.id+'"><div class="tile" style="aspect-ratio:1;background:'+(i.kind==='lost'?'linear-gradient(140deg,#7d2a2a,#b6544a)':'linear-gradient(140deg,#1a5a45,#2f8a68)')+'">'+I(i.cat==='keys'?'tag':i.cat==='clothing'?'tag':i.cat==='electronics'?'spark':i.cat==='wallets'?'bag':'compass')+'<div class="tl"><span class="badge" style="background:#fff">'+i.kind.toUpperCase()+'</span>'+(i.status!=='open'?'<span class="badge green">'+(i.status==='resolved'?'Returned':'Claimed')+'</span>':'')+'</div></div><div style="padding:12px"><div class="sb trunc">'+esc(i.title)+'</div><div class="xs muted row trunc" style="gap:4px;margin-top:3px">'+I('pin','sm')+esc(i.loc)+'</div><div class="xs faint" style="margin-top:4px">'+rel(i.t)+'</div></div></button>';}).join('')+'</div>':empty('No items here','Lost something? Report it and you’ll be alerted about possible matches.');
+  return out;
+};
+
+VIEW.market=function(){
+  var tab=S.ui.mkTab,cat=S.ui.mkCat,sort=S.ui.mkSort;
+  var list=S.listings.filter(function(l){if(tab==='free')return l.type==='giveaway';if(tab==='wishlist')return l.wish;if(tab==='mine')return l.seller===S.user.name;return true;}).filter(function(l){return cat==='all'||l.cat===cat;});
+  list=list.slice().sort(function(a,b){return sort==='asc'?a.price-b.price:sort==='desc'?b.price-a.price:b.t-a.t;});
+  var out=ph('Buy & Sell','Student-only marketplace. Buy, sell, swap or give away.','<button class="btn gold" data-a="newListing">'+I('plus')+'List an item</button>');
+  out+='<div class="small" style="display:flex;gap:10px;background:var(--tint);border-radius:14px;padding:12px 14px;margin-bottom:16px;color:var(--navy-2)">'+I('shield')+'<span><b>Stay safe:</b> meet in public campus spaces, inspect before paying and never share OTPs. Payments happen directly between students. Report suspicious listings.</span></div>';
+  out+='<div class="toolbar">'+seg('mkTab',[['browse','Browse'],['free','Free stuff'],['wishlist','Wishlist',S.listings.filter(function(l){return l.wish;}).length],['mine','My listings']])+'<label class="grow row small muted" for="mksort">Sort <select id="mksort" class="inp" style="width:auto;padding:6px 10px" data-bind="mkSort"><option value="new"'+(sort==='new'?' selected':'')+'>Newest</option><option value="asc"'+(sort==='asc'?' selected':'')+'>Price: low to high</option><option value="desc"'+(sort==='desc'?' selected':'')+'>Price: high to low</option></select></label></div>';
+  out+=chips('mkCat',[['all','All']].concat(Object.keys(MKC).map(function(k){return [k,MKC[k][0]];})));
+  out+=list.length?'<div class="g4 keep">'+list.map(listCard).join('')+'</div>':empty(tab==='mine'?'You haven’t listed anything yet':'No listings here','','<button class="btn soft" data-a="newListing">List an item</button>');
+  return out;
+};
+
+VIEW.messages=function(){
+  var c=S.convos.find(function(x){return x.id===S.ui.convo;});
+  var out=ph('Messages','Private chats about listings, lost items and teams.');
+  if(!S.convos.length)return out+empty('No conversations yet','Start a chat from a listing, a lost & found report or a team.');
+  out+='<div class="card chatwrap '+(S.ui.thread?'thread-open':'')+'"><div class="chatlist">'+S.convos.map(function(x){var last=x.msgs[x.msgs.length-1];return '<button class="ci '+(x.id===S.ui.convo?'on':'')+'" data-a="convo" data-id="'+x.id+'"><span class="av">'+initials(x.with)+'</span><div style="min-width:0;flex:1"><div class="between"><span class="'+(x.unread?'b':'sb')+'">'+esc(x.with)+'</span><span class="xs faint">'+(last?rel(last.t):'')+'</span></div><div class="xs trunc" style="color:var(--navy-3)">'+esc(x.ctx)+'</div><div class="small trunc '+(x.unread?'sb':'muted')+'">'+esc(last?last.x:'')+'</div></div>'+(x.unread?'<span class="badge gold">'+x.unread+'</span>':'')+'</button>';}).join('')+'</div>';
+  if(c){out+='<div class="thread"><div class="thead"><button class="iconbtn" data-a="closeThread" aria-label="Back">'+I('back')+'</button><span class="av">'+initials(c.with)+'</span><div><div class="b">'+esc(c.with)+'</div><div class="xs" style="color:var(--navy-3)">Re: '+esc(c.ctx)+'</div></div></div><div class="msgs" id="msgs"><div class="xs muted" style="align-self:center;background:#fff;border-radius:10px;padding:6px 10px;margin-bottom:6px">'+I('shield','sm')+' Never share OTPs, passwords or card details.</div>'+c.msgs.map(function(m){return '<div class="m '+(m.me?'me':'')+'">'+esc(m.x)+'<small>'+fTime(m.t)+'</small></div>';}).join('')+(c.typing?'<div class="typing">'+esc(c.with)+' is typing…</div>':'')+'</div><form class="compose" data-f="send"><label for="msgbox" style="position:absolute;left:-9999px">Message</label><input id="msgbox" name="x" class="inp" placeholder="Type a message" autocomplete="off"><button class="btn" aria-label="Send">'+I('send')+'</button></form></div>';}
+  out+='</div>';
+  return out;
+};
+
+VIEW.notifications=function(){
+  var tab=S.ui.ntTab;
+  var list=S.notifs.filter(function(n){return tab==='all'||(tab==='unread'&&!n.read)||(tab==='important'&&n.pr!=='normal');});
+  var ICO={academics:'cal',parcels:'box',opportunities:'trophy',events:'spark',community:'users',announcements:'mega',lost_found:'compass',marketplace:'bag',messages:'chat',system:'bell'};
+  var out=ph('Notifications','Urgent academic notices are shown in red and always delivered.','<button class="btn out sm" data-a="readAll">'+I('check','sm')+'Mark all read</button><a class="btn ghost sm" href="#profile">'+I('gear','sm')+'Preferences</a>');
+  out+='<div class="toolbar">'+seg('ntTab',[['all','All'],['unread','Unread',unread()],['important','Important']])+'</div>';
+  out+=list.length?'<div class="stack" style="gap:8px">'+list.map(function(n){return '<button class="nt '+(n.read?'':'unread ')+(n.pr==='urgent'?'urg':n.pr==='important'?'imp':'')+'" data-a="openNotif" data-id="'+n.id+'"><span class="ico">'+I(n.pr==='urgent'?'alert':ICO[n.type]||'bell')+'</span><div style="flex:1;min-width:0"><div class="between" style="align-items:flex-start"><span class="'+(n.read?'sb':'b')+'" style="'+(n.pr==='urgent'?'color:#7d1d18':'')+'">'+esc(n.title)+'</span><span class="xs faint" style="white-space:nowrap">'+rel(n.t)+'</span></div>'+(n.body?'<div class="small muted clamp2">'+esc(n.body)+'</div>':'')+(n.pr==='urgent'?'<div class="xs b" style="color:var(--red);letter-spacing:.06em;margin-top:3px">URGENT ACADEMIC NOTICE</div>':'')+'</div></button>';}).join('')+'</div>':empty('Nothing here','We’ll let you know when something needs your attention.');
+  return out;
+};
+
+VIEW.community=function(){
+  var b=S.boards.find(function(x){return x.id===S.ui.board;});
+  if(b){
+    var posts=S.posts.filter(function(p){return p.board===b.id;}).sort(function(a,c){return c.t-a.t;});
+    var out='<button class="link row" data-a="board" data-id="" style="margin-bottom:12px">'+I('back','sm')+'Community</button>'+ph(esc(b.name),esc(b.desc),'<button class="btn gold" data-a="newPost">'+I('plus')+'New post</button>');
+    out+=posts.length?'<div class="stack">'+posts.map(postCard).join('')+'</div>':empty('No posts yet','Start the conversation.');
+    return out;
+  }
+  var out2=ph('Community','Discuss, ask doubts, find teammates and help each other.','<button class="btn gold" data-a="newGroup">'+I('plus')+'New interest group</button>');
+  out2+='<div class="card pad small muted" style="display:flex;gap:10px;margin-bottom:20px">'+'<span style="color:var(--navy-3)">'+I('shield')+'</span><span><b style="color:var(--ink)">Community guidelines:</b> be respectful, no harassment, don’t share graded answers or others’ personal information, and report anything that breaks the rules. Moderators may hide content.</span></div>';
+  ['Your batch','Campus boards','Interest groups'].forEach(function(k){
+    var bs=S.boards.filter(function(x){return x.kind===k;});
+    out2+='<div class="sec"><h2>'+k+'</h2></div><div class="g3 boards" style="margin-bottom:22px">'+bs.map(function(x){var n=S.posts.filter(function(p){return p.board===x.id;}).length;return '<div class="card hov" style="display:flex;align-items:center"><a href="#community" data-a="board" data-id="'+x.id+'" style="flex:1;min-width:0"><span class="bico">'+initials(x.name.replace(/[^A-Za-z ]/g,''))+'</span><div style="min-width:0"><div class="b trunc">'+esc(x.name)+'</div><div class="xs muted">'+esc(x.desc)+'</div>'+(n?'<div class="xs b" style="color:var(--green);margin-top:3px">'+n+' post'+(n>1?'s':'')+' this week</div>':'')+'</div></a>'+(k==='Interest groups'?'<button class="btn sm '+(x.joined?'soft':'out')+'" style="margin-right:14px" data-a="joinBoard" data-id="'+x.id+'">'+(x.joined?'Joined':'Join')+'</button>':'')+'</div>';}).join('')+'</div>';
+  });
+  return out2;
+};
+function postCard(p){return '<div class="card" style="display:flex;gap:12px;padding:14px 16px"><button class="vote '+(p.voted?'on':'')+'" data-a="vote" data-id="'+p.id+'" aria-label="Upvote">'+I('up','sm')+p.votes+'</button><button data-a="post" data-id="'+p.id+'" style="flex:1;text-align:left;min-width:0"><span class="badge '+(p.tag==='Academic doubt'?'blue':p.tag==='Find teammates'?'gold':'')+'">'+p.tag+'</span><div class="b" style="margin-top:6px;font-size:15px">'+esc(p.title)+'</div><div class="small muted clamp2">'+esc(p.body)+'</div><div class="between xs muted" style="margin-top:8px"><span class="row" style="gap:6px"><span class="av" style="width:20px;height:20px;font-size:9px">'+initials(p.by)+'</span>'+esc(p.by)+' · '+rel(p.t)+'</span><span class="row" style="gap:4px">'+I('chat','sm')+p.replies.length+'</span></div></button></div>';}
+
+VIEW.announcements=function(){
+  var cat=S.ui.annCat;
+  var list=S.ann.filter(function(a){return cat==='all'||a.cat===cat;}).sort(function(a,b){return (b.pin-a.pin)||(b.t-a.t);});
+  var out=ph('Announcements & Notices','Official notices carry an Official badge. Urgent notices are shown in red.',S.role==='admin'?'<button class="btn gold" data-a="newAnn">'+I('plus')+'New announcement</button>':'');
+  out+=chips('annCat',[['all','All'],['academic','Academic'],['administrative','Administrative'],['placement','Placement'],['general','General']]);
+  out+='<div class="stack">'+list.map(function(a){return '<div class="card pad" style="'+(a.pr==='urgent'?'background:#fff8f7;border-color:#f2c7c4':a.pr==='important'?'border-color:#efe0b3':'')+'"><div class="row" style="gap:6px">'+(a.pr==='urgent'?'<span class="badge red">'+I('alert','sm')+'Urgent</span>':'')+(a.pr==='important'?'<span class="badge gold">Important</span>':'')+(a.pin?'<span class="badge">Pinned</span>':'')+'<span class="badge" style="text-transform:capitalize">'+a.cat+'</span>'+badgeOfficial(a)+'</div><h2 style="font-size:18px;margin-top:8px;'+(a.pr==='urgent'?'color:#7d1d18':'')+'">'+esc(a.title)+'</h2><p class="muted" style="margin:6px 0 0;max-width:68ch">'+esc(a.body)+'</p><div class="xs faint" style="margin-top:10px">'+esc(a.by)+' · '+rel(a.t)+'</div></div>';}).join('')+'</div>';
+  return out;
+};
+
+VIEW.profile=function(){
+  var u=S.user;
+  var out=ph('Profile & settings','');
+  out+='<div class="g2" style="align-items:start"><div class="card pad stack"><div class="row"><span class="av lg">'+initials(u.name)+'</span><div><div class="b" style="font-size:18px">'+esc(u.name)+'</div><div class="small muted">'+esc(u.email)+'</div><div class="row" style="gap:6px;margin-top:4px"><span class="badge">'+u.program+'</span><span class="badge">'+u.batch+'</span><span class="badge">Section '+u.section+'</span><span class="badge">'+esc(u.hostel)+'</span></div></div></div>'+
+    '<div><div class="small sb" style="margin-bottom:6px">Interests</div><div class="row" style="gap:6px">'+u.interests.map(function(i){return '<span class="badge blue">'+i+'</span>';}).join('')+'</div></div>'+
+    '<button class="toggle" data-a="teamToggle"><span><span class="sb">Open to joining competition teams</span><br><span class="xs muted">Shows you in the teammate finder</span></span><span class="sw '+(u.team?'on':'')+'"></span></button>'+
+    '<div class="card" style="background:var(--tint);border:0;padding:14px"><div class="sb">Prototype controls</div><div class="xs muted" style="margin:2px 0 10px">Switch between the student and admin experience, or restore the original sample data.</div><div class="row"><button class="btn sm" data-a="role">'+I('shield','sm')+(S.role==='admin'?'Switch to student view':'Switch to admin view')+'</button><button class="btn sm out" data-a="reset">Reset sample data</button><button class="btn sm ghost" data-a="logout">'+I('logout','sm')+'Sign out</button></div></div></div>';
+  out+='<div class="card pad"><div class="b">Notification preferences</div><div class="xs muted" style="margin-bottom:6px">Urgent academic notices are always delivered.</div>'+[['announcements','Announcements & notices'],['events','New campus events'],['opportunities','Competitions & opportunities'],['parcels','Parcel updates'],['lost_found','Lost & found matches'],['academics','Timetable & exam changes'],['marketplace','Marketplace offers'],['messages','Direct messages'],['community','Community replies']].map(function(p){return '<button class="toggle" data-a="pref" data-k="'+p[0]+'"><span class="small sb">'+p[1]+'</span><span class="sw '+(S.prefs[p[0]]?'on':'')+'"></span></button>';}).join('')+'</div></div>';
+  return out;
+};
+
+VIEW.admin=function(){
+  if(S.role!=='admin')return empty('Admin access required','Use the role switch at the top to see the admin panel.','<button class="btn" data-a="role">Switch to admin view</button>');
+  var tab=S.ui.adTab;
+  var out='<div class="xs b" style="letter-spacing:.14em;color:var(--gold);margin-bottom:6px">ADMIN PANEL</div>'+ph('Campus operations','Super admin view. Actions here appear instantly for students.');
+  out+='<div class="toolbar">'+seg('adTab',[['overview','Overview'],['academics','Academics'],['desk','Parcel desk'],['moderation','Moderation',S.reports.filter(function(r){return r.status==='open';}).length+S.opps.filter(function(o){return !o.ok;}).length],['publish','Publish']])+'</div>';
+  if(tab==='overview'){
+    var st=[['users','Registered students','412'],['spark','Event registrations (30 days)','318'],['trophy','Open opportunities',String(S.opps.filter(function(o){return o.reg>Date.now();}).length)],['box','Parcels waiting at desk',String(S.deskParcels.filter(function(p){return p.st===3;}).length+1)],['bag','Active listings',String(S.listings.filter(function(l){return l.status!=='sold';}).length+46)],['compass','Lost & found open / returned','9 / 14'],['chat','Messages this week','210'],['flag','Open reports',String(S.reports.filter(function(r){return r.status==='open';}).length)]];
+    out+='<div class="g4 keep" style="margin-bottom:18px">'+st.map(function(s){return '<div class="card stat"><span class="bx">'+I(s[0])+'</span><div><b class="num">'+s[2]+'</b><span class="xs muted">'+s[1]+'</span></div></div>';}).join('')+'</div>';
+    out+='<div class="g2"><div class="card pad"><div class="b" style="margin-bottom:12px">Students by batch</div>'+[['2026-28',205],['2025-27',190],['PhD',17]].map(function(r){return '<div class="hbar"><span>'+r[0]+'</span><div class="bar"><i style="width:'+(r[1]/205*100)+'%"></i></div><b class="num">'+r[1]+'</b></div>';}).join('')+'</div><div class="card pad"><div class="b" style="margin-bottom:12px">Weekly active use by module</div>'+[['Timetable',388],['Events',301],['Marketplace',244],['Competitions',197],['Parcels',152],['Community',139]].map(function(r){return '<div class="hbar"><span>'+r[0]+'</span><div class="bar"><i style="width:'+(r[1]/388*100)+'%;background:var(--gold)"></i></div><b class="num">'+r[1]+'</b></div>';}).join('')+'<div class="xs faint">Illustrative figures for the prototype.</div></div></div>';
+  }else if(tab==='academics'){
+    var ss=sessions(0,2).filter(function(s){return s.end>Date.now();}).slice(0,10);
+    out+='<div class="card pad" style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:16px"><span class="bx" style="width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--green-soft);color:var(--green)">'+I('upload')+'</span><div style="flex:1;min-width:220px"><div class="b">Upload a timetable (CSV or Excel)</div><div class="small muted">One row per class: date, start, end, course code, course name, faculty, room, batch, section.</div></div><button class="btn" data-a="upload">'+I('upload','sm')+'Upload file</button></div>';
+    out+='<div class="sec"><h2>Upcoming classes · 2026-28 Section A</h2></div><div class="card" style="overflow:hidden">'+ss.map(function(s){return '<div class="li" style="flex-wrap:wrap"><span class="t" style="width:120px">'+fDay(s.start)+'<br>'+fTime(s.start)+'</span><div style="flex:1;min-width:160px"><div class="sb '+(s.status==='cancelled'?'strike':'')+'">'+s.code+' · '+s.name+'</div><div class="xs muted">'+s.room+' · '+s.fac+'</div></div>'+(s.status!=='scheduled'?'<span class="badge '+(s.status==='cancelled'?'red':'amber')+'">'+s.status+'</span>':'')+'<div class="row" style="gap:6px">'+(s.status==='scheduled'?'<button class="btn sm out" data-a="ttCancel" data-id="'+s.id+'">Cancel</button><button class="btn sm out" data-a="ttMove" data-id="'+s.id+'">Relocate</button>':'<button class="btn sm soft" data-a="ttRestore" data-id="'+s.id+'">Restore</button>')+'</div></div>';}).join('')+'</div><div class="xs muted" style="margin-top:8px">Cancelling or relocating sends an urgent notification to every student in the section. Switch to the student view to see it.</div>';
+  }else if(tab==='desk'){
+    out+='<div class="card pad" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:16px"><form data-f="verify" class="row" style="flex:1;min-width:260px;align-items:flex-end"><label class="f" style="flex:1" for="otpv">Verify collection OTP<input id="otpv" name="otp" class="inp otpinp" inputmode="numeric" maxlength="6" placeholder="••••••"></label><button class="btn gold">Verify & hand over</button></form><button class="btn out" data-a="remindDesk">'+I('bell','sm')+'Remind uncollected</button></div>';
+    var rows=S.deskParcels.concat(S.parcels.filter(function(p){return p.st<4;}).map(function(p){return {id:p.id,student:S.user.name+' (you)',courier:p.courier,track:p.track,st:p.st,otp:p.otp,mine:true};}));
+    out+='<div class="card scrollx"><table class="t"><thead><tr><th>Student</th><th>Parcel</th><th>Status</th><th></th></tr></thead><tbody>'+rows.map(function(p){return '<tr><td class="sb">'+esc(p.student)+'</td><td>'+esc(p.courier)+'<div class="xs muted">'+esc(p.track)+'</div></td><td><span class="badge '+(p.st===3?'gold':p.st===4?'green':'')+'">'+PST[p.st]+'</span>'+(p.old?' <span class="badge amber">Uncollected 3 days</span>':'')+'</td><td style="text-align:right">'+(p.st<3?'<button class="btn sm out" data-a="deskNext" data-id="'+p.id+'">Mark '+PST[p.st+1]+'</button>':p.st===3?'<span class="xs muted">Awaiting OTP'+(p.mine?' (yours: '+p.otp+')':' (demo: '+p.otp+')')+'</span>':'')+'</td></tr>';}).join('')+'</tbody></table></div>';
+  }else if(tab==='moderation'){
+    var rep=S.reports.filter(function(r){return r.status==='open';}),un=S.opps.filter(function(o){return !o.ok;});
+    out+='<div class="sec"><h2>'+I('flag')+'Open reports</h2></div>'+(rep.length?'<div class="stack" style="margin-bottom:22px">'+rep.map(function(r){return '<div class="card pad"><div class="row"><span class="badge red">'+r.reason+'</span><span class="badge">'+r.what+'</span><span class="xs faint" style="margin-left:auto">'+rel(r.t)+'</span></div><div class="sb" style="margin-top:6px">'+esc(r.target)+'</div><div class="row" style="margin-top:10px"><button class="btn sm red" data-a="modHide" data-id="'+r.id+'">'+I('eye','sm')+'Hide content</button><button class="btn sm out" data-a="modDismiss" data-id="'+r.id+'">Dismiss</button></div></div>';}).join('')+'</div>':'<div style="margin-bottom:22px">'+empty('No open reports')+'</div>');
+    out+='<div class="sec"><h2>'+I('shield')+'Opportunities awaiting verification</h2></div>'+(un.length?'<div class="stack">'+un.map(function(o){return '<div class="card pad row"><div style="flex:1;min-width:200px"><div class="sb">'+esc(o.title)+'</div><div class="xs muted">'+esc(o.org)+' · submitted by a student</div></div><button class="btn sm" data-a="verifyOpp" data-id="'+o.id+'">'+I('check','sm')+'Verify & publish</button><button class="btn sm out" data-a="rejectOpp" data-id="'+o.id+'">Reject</button></div>';}).join('')+'</div>':empty('Nothing to verify'));
+  }else{
+    out+='<div class="g2" style="align-items:start"><div class="card pad"><div class="b" style="margin-bottom:12px">Publish an event</div>'+eventForm()+'</div><div class="card pad"><div class="b" style="margin-bottom:12px">Post an announcement</div>'+annForm()+'</div></div>';
+  }
+  return out;
+};
+function eventForm(){return '<form class="form" data-f="event"><label class="f" for="ev-t">Event title<input id="ev-t" name="title" class="inp" required placeholder="e.g. Fintech Panel Discussion"></label><div class="formrow"><label class="f" for="ev-c">Category<select id="ev-c" name="cat" class="inp">'+Object.keys(CATS).map(function(k){return '<option value="'+k+'">'+CATS[k][0]+'</option>';}).join('')+'</select></label><label class="f" for="ev-d">In how many days?<select id="ev-d" name="day" class="inp"><option value="1">Tomorrow</option><option value="2">In 2 days</option><option value="3" selected>In 3 days</option><option value="6">Next week</option></select></label><label class="f" for="ev-v">Venue<input id="ev-v" name="venue" class="inp" placeholder="Auditorium"></label><label class="f" for="ev-cap">Capacity<input id="ev-cap" name="cap" class="inp" inputmode="numeric" placeholder="100"></label></div><label class="f" for="ev-desc">Description<textarea id="ev-desc" name="desc" class="inp" placeholder="What should students expect?"></textarea></label><button class="btn gold">Publish & notify students</button></form>';}
+function annForm(){return '<form class="form" data-f="ann"><label class="f" for="an-t">Title<input id="an-t" name="title" class="inp" required placeholder="e.g. Fee payment deadline"></label><label class="f" for="an-b">Message<textarea id="an-b" name="body" class="inp" required></textarea></label><div class="formrow"><label class="f" for="an-p">Priority<select id="an-p" name="pr" class="inp"><option value="normal">Normal</option><option value="important">Important</option><option value="urgent">Urgent</option></select></label><label class="f" for="an-c">Category<select id="an-c" name="cat" class="inp"><option value="academic">Academic</option><option value="administrative">Administrative</option><option value="placement">Placement</option><option value="general">General</option></select></label></div><label class="row small sb" for="an-o"><input id="an-o" type="checkbox" name="official" checked> Mark as Official notice</label><button class="btn gold">Publish & notify</button></form>';}
+
+/* ---------------------------------------------------------------- modals */
+function modal(){
+  var m=M,body='',title='',foot='',wide=false;
+  if(m.t==='event'){
+    var e=S.events.find(function(x){return x.id===m.id;}),c=CATS[e.cat],now=Date.now(),started=e.start<now,ended=(e.end||e.start)<now;
+    title=c[0];wide=true;
+    body='<div class="banner" style="'+evArt(e)+';margin:-4px 0 16px"><div class="xs b" style="opacity:.8;letter-spacing:.08em">'+esc(e.org).toUpperCase()+'</div><div style="font-family:var(--display);font-size:26px;font-weight:700;margin-top:4px">'+esc(e.title)+'</div></div>'+
+      '<div class="g2" style="margin-bottom:14px"><div class="info"><span class="bx">'+I('clock')+'</span><div><div class="xs muted">When</div><div class="sb">'+fLong(e.start)+'</div><div class="xs muted">'+fTime(e.start)+' – '+fTime(e.end)+'</div></div></div><div class="info"><span class="bx">'+I('pin')+'</span><div><div class="xs muted">Venue</div><div class="sb">'+esc(e.venue)+'</div></div></div>'+(e.cap?'<div class="info"><span class="bx">'+I('users')+'</span><div><div class="xs muted">Capacity</div><div class="sb">'+e.reg+' / '+e.cap+' registered</div>'+(e.wait?'<div class="xs muted">'+e.wait+' on waitlist</div>':'')+'</div></div>':'')+'</div>'+
+      (e.cap?'<div class="bar" style="margin-bottom:14px"><i style="width:'+Math.min(100,e.reg/e.cap*100)+'%"></i></div>':'')+'<p class="muted" style="margin:0 0 6px">'+esc(e.desc)+'</p>';
+    if(e.me==='registered'&&!ended&&e.start-now<3*H)body+='<div class="card pad" style="margin-top:12px;background:var(--green-soft);border:0">'+(e.checked?'<b style="color:var(--green)">'+I('check','sm')+' You’re checked in</b>':'<div class="b">Check in at the venue</div><div class="small muted">Scan the organiser’s QR code with your phone camera.</div><button class="btn sm" style="margin-top:10px" data-a="checkin" data-id="'+e.id+'">'+I('qr','sm')+'Simulate QR scan</button>')+'</div>';
+    if(!ended){
+      foot='<button class="btn out" data-a="ics" data-v="'+esc(e.title)+'">'+I('cal','sm')+'Add to calendar</button><button class="btn out" data-a="remind" data-id="e'+e.id+'" data-title="'+esc(e.title)+'">'+I('bell','sm')+(S.reminders['e'+e.id]?'Reminder set':'Remind me')+'</button>';
+      if(!e.cap)foot+='<span class="badge green" style="align-self:center">Open event · no registration</span>';
+      else if(e.me)foot+=(started?'':'<button class="btn out" data-a="unreg" data-id="'+e.id+'">Cancel registration</button>')+'<span class="badge '+(e.me==='registered'?'green':'amber')+'" style="align-self:center">'+(e.me==='registered'?'You’re registered':'On waitlist')+'</span>';
+      else if(!started)foot+='<button class="btn gold" data-a="reg" data-id="'+e.id+'">'+(e.reg>=e.cap?'Join waitlist':'Register')+'</button>';
+    }else foot='<span class="badge">Completed</span>';
+  }else if(m.t==='opp'){
+    var o=S.opps.find(function(x){return x.id===m.id;});title=OTYPES[o.type];wide=true;
+    var teams=S.teams.filter(function(t){return t.opp===o.id;});
+    body='<div class="row" style="gap:6px"><span class="badge blue">'+OCATS[o.cat]+'</span>'+(o.ok?'<span class="badge green">'+I('shield','sm')+'Verified</span>':'<span class="badge amber">Unverified · student submitted</span>')+'</div><h2 style="font-family:var(--display);font-size:26px;margin-top:8px">'+esc(o.title)+'</h2><div class="muted">'+esc(o.org)+'</div>'+
+      '<div class="g4 keep" style="margin:16px 0;gap:12px"><div><div class="xs muted">Registration closes</div><div class="sb small">'+fDT(o.reg)+'</div>'+cd(o.reg)+'</div><div><div class="xs muted">Submission</div><div class="sb small">'+(o.sub?fDT(o.sub):'—')+'</div></div><div><div class="xs muted">Team size</div><div class="sb small">'+esc(o.team)+'</div></div><div><div class="xs muted">Prize</div><div class="sb small">'+esc(o.prize)+'</div></div></div>'+
+      '<p style="margin:0 0 6px">'+esc(o.desc)+'</p><div class="small muted"><b>Eligibility:</b> '+esc(o.elig)+'</div>'+
+      '<div class="sec" style="margin-top:18px"><h2>'+I('users')+'Teams for this competition</h2><button class="btn sm soft" data-a="newTeam" data-id="'+o.id+'">'+I('plus','sm')+'Create team</button></div>'+(teams.length?'<div class="stack">'+teams.map(teamCard).join('')+'</div>':'<div class="muted small">No teams yet. Create one and others can request to join.</div>');
+    foot='<button class="btn out" data-a="save" data-id="'+o.id+'">'+I('bookmark','sm')+(o.saved?'Saved':'Save')+'</button>'+(o.reg>Date.now()?'<button class="btn out" data-a="remind" data-id="o'+o.id+'" data-title="Registration closes: '+esc(o.title)+'">'+I('bell','sm')+(S.reminders['o'+o.id]?'Reminder set':'Remind me')+'</button><button class="btn gold" data-a="extReg">Register on organiser site</button>':'');
+  }else if(m.t==='listing'){
+    var l=S.listings.find(function(x){return x.id===m.id;}),mine=l.seller===S.user.name,mc=MKC[l.cat];title=mc[0];
+    body='<div class="tile" style="'+tileArt(l.cat)+';border-radius:14px;aspect-ratio:16/8;margin-bottom:14px">'+I(mc[2])+'</div><div class="row" style="gap:6px"><span class="badge">'+COND[l.cond]+'</span>'+(l.status!=='available'?'<span class="badge amber">'+l.status+'</span>':'')+'</div><h2 style="font-size:22px;margin-top:6px">'+esc(l.title)+'</h2><div class="row" style="margin-top:4px"><b style="font-size:24px">'+(l.type==='giveaway'?'Free':l.type==='exchange'?'For exchange':rupees(l.price))+'</b>'+(l.neg?'<span class="muted small">· Open to offers</span>':'')+'</div><p class="muted">'+esc(l.desc)+'</p><div class="card" style="display:flex;gap:10px;align-items:center;padding:12px;box-shadow:none"><span class="av">'+initials(l.seller)+'</span><div><div class="sb">'+esc(l.seller)+(mine?' (you)':'')+'</div><div class="xs muted">'+l.sbatch+' · listed '+rel(l.t)+'</div></div></div>'+(m.offer?'<form class="form" data-f="offer" style="margin-top:14px"><label class="f" for="off-a">Your offer (₹)<input id="off-a" name="amt" class="inp" inputmode="numeric" required placeholder="'+Math.round(l.price*.85)+'"></label><button class="btn gold">Send offer</button></form>':'');
+    foot=mine?(l.status!=='sold'?'<button class="btn out" data-a="sold" data-id="'+l.id+'">Mark as sold</button>':'<span class="badge">Sold</span>'):(l.status==='sold'?'<span class="badge">Sold</span>':'<button class="btn ghost" data-a="report" data-v="Marketplace listing" data-title="'+esc(l.title)+'">'+I('flag','sm')+'Report</button><button class="btn out" data-a="wish" data-id="'+l.id+'">'+I('heart','sm')+(l.wish?'Wishlisted':'Wishlist')+'</button>'+(l.neg&&!m.offer?'<button class="btn out" data-a="offer">Make offer</button>':'')+'<button class="btn gold" data-a="dm" data-v="'+esc(l.seller)+'" data-ctx="'+esc(l.title)+'">'+I('chat','sm')+'Chat with seller</button>');
+  }else if(m.t==='lf'){
+    var it=S.lf.find(function(x){return x.id===m.id;}),me=it.by===S.user.name,cl=S.claims.find(function(c){return c.item===it.id;});title=it.kind==='lost'?'Lost item':'Found item';
+    body='<div class="row" style="gap:6px"><span class="badge '+(it.kind==='lost'?'red':'green')+'">'+it.kind.toUpperCase()+'</span><span class="badge">'+LFC[it.cat]+'</span>'+(it.status!=='open'?'<span class="badge green">'+(it.status==='resolved'?'Returned':'Claim approved')+'</span>':'')+'</div><h2 style="font-size:22px;margin-top:8px">'+esc(it.title)+'</h2><div class="stack small muted" style="gap:4px;margin:8px 0"><span class="row" style="gap:6px">'+I('pin','sm')+esc(it.loc)+'</span><span class="row" style="gap:6px">'+I('clock','sm')+fDT(it.t)+'</span></div><p>'+esc(it.desc)+'</p><div class="small muted">Reported by '+esc(it.by)+'. Contact happens only through in-app messages; personal details are never shown.</div>'+
+      (m.claim?'<form class="form" data-f="claim" style="margin-top:14px"><label class="f" for="cl-m">Proof of ownership<textarea id="cl-m" name="msg" class="inp" required placeholder="Describe something only the owner would know: a scratch, a sticker, what’s inside…"></textarea><span class="hint">The finder reviews this privately before handing it over.</span></label><button class="btn gold">Submit claim</button></form>':'')+(cl?'<div class="card pad" style="margin-top:12px;background:var(--amber-soft);border:0">Your claim is <b>'+cl.status+'</b>. The finder will verify it.</div>':'');
+    foot=me?(it.status!=='resolved'?'<button class="btn" data-a="resolve" data-id="'+it.id+'">'+I('check','sm')+'Mark returned</button>':'<span class="badge green">Returned</span>'):it.status!=='open'?'':(it.kind==='found'?(cl||m.claim?'':'<button class="btn gold" data-a="claim">This is mine: claim it</button>'):'<button class="btn gold" data-a="dm" data-v="'+esc(it.by)+'" data-ctx="'+esc(it.title)+'">'+I('chat','sm')+'I found this: message owner</button>');
+  }else if(m.t==='post'){
+    var p=S.posts.find(function(x){return x.id===m.id;});title=p.tag;
+    body='<h2 style="font-size:20px">'+esc(p.title)+'</h2><div class="xs muted" style="margin:4px 0 10px">'+esc(p.by)+' · '+rel(p.t)+'</div><p style="margin:0 0 16px">'+esc(p.body)+'</p><div class="sb small" style="margin-bottom:8px">'+p.replies.length+' repl'+(p.replies.length===1?'y':'ies')+'</div><div class="stack" style="gap:8px">'+p.replies.map(function(r){return '<div style="display:flex;gap:10px"><span class="av" style="width:28px;height:28px;font-size:10px">'+initials(r.by)+'</span><div style="background:var(--bg);border-radius:12px;padding:8px 12px;flex:1"><div class="xs sb">'+esc(r.by)+' <span class="faint" style="font-weight:400">· '+rel(r.t)+'</span></div><div class="small">'+esc(r.x)+'</div></div></div>';}).join('')+'</div><form class="row" data-f="reply" style="margin-top:14px;flex-wrap:nowrap"><label for="rp" style="position:absolute;left:-9999px">Reply</label><input id="rp" name="x" class="inp" placeholder="Write a reply…" required><button class="btn">Reply</button></form>';
+    foot='<button class="btn ghost" data-a="report" data-v="Community post" data-title="'+esc(p.title)+'">'+I('flag','sm')+'Report</button>';
+  }else if(m.t==='form'){
+    title=m.title;body=m.html;
+  }else if(m.t==='search'){
+    return '<div class="ov" data-a="close"><div class="md" style="align-self:flex-start;margin-top:8vh" data-stop="1"><div class="mh" style="gap:10px">'+I('search')+'<label for="q" style="position:absolute;left:-9999px">Search</label><input id="q" class="inp" style="border:0;box-shadow:none;padding:6px 0;font-size:16px" placeholder="Search events, competitions, items, courses, notices…" autocomplete="off" value="'+esc(S.ui.q||'')+'"><button class="iconbtn" data-a="close" aria-label="Close">'+I('x')+'</button></div><div class="mb" id="sres" style="padding:8px 10px">'+searchResults(S.ui.q||'')+'</div></div></div>';
+  }else if(m.t==='more'){
+    return '<div class="ov" data-a="close"><div class="md" data-stop="1"><div class="mh"><h3>All modules</h3><button class="iconbtn" data-a="close" aria-label="Close">'+I('x')+'</button></div><div class="mb"><div class="g4 keep" style="grid-template-columns:repeat(4,1fr);gap:8px">'+NAV.concat([['notifications','Alerts','bell'],['profile','Profile','user'],['admin','Admin','shield']]).map(function(n){return '<a href="#'+n[0]+'" data-a="go" data-v="'+n[0]+'" style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;font-weight:600;text-align:center;padding:6px 0"><span style="width:48px;height:48px;border-radius:15px;background:var(--tint);color:var(--navy-3);display:grid;place-items:center">'+I(n[2])+'</span>'+n[1]+'</a>';}).join('')+'</div></div></div></div>';
+  }
+  return '<div class="ov" data-a="close"><div class="md '+(wide?'wide':'')+'" data-stop="1" role="dialog" aria-modal="true" aria-label="'+esc(title)+'"><div class="mh"><h3>'+esc(title)+'</h3><button class="iconbtn" data-a="close" aria-label="Close">'+I('x')+'</button></div><div class="mb">'+body+'</div>'+(foot?'<div class="mf" style="flex-wrap:wrap">'+foot+'</div>':'')+'</div></div>';
+}
+function searchResults(q){
+  q=q.trim().toLowerCase();
+  if(q.length<2)return '<div class="sgrp">Go to</div><div class="sres">'+NAV.slice(0,8).map(function(n){return '<a href="#'+n[0]+'" data-a="go" data-v="'+n[0]+'">'+I(n[2],'sm')+n[1]+'</a>';}).join('')+'</div>';
+  function has(s){return String(s||'').toLowerCase().indexOf(q)>=0;}
+  var groups=[
+    ['Events',S.events.filter(function(e){return has(e.title)||has(e.org)||has(e.venue);}).map(function(e){return ['event',e.id,e.title,fDay(e.start)+' · '+e.venue];})],
+    ['Competitions',S.opps.filter(function(o){return has(o.title)||has(o.org);}).map(function(o){return ['opp',o.id,o.title,o.org];})],
+    ['Marketplace',S.listings.filter(function(l){return has(l.title);}).map(function(l){return ['listing',l.id,l.title,l.type==='sell'?rupees(l.price):l.type];})],
+    ['Lost & Found',S.lf.filter(function(i){return has(i.title)||has(i.loc);}).map(function(i){return ['lf',i.id,i.title,i.kind+' · '+i.loc];})],
+    ['Courses & exams',COURSES.filter(function(c){return has(c[0])||has(c[1]);}).map(function(c){return ['go','timetable',c[0]+' · '+c[1],c[2]];}).concat(S.exams.filter(function(e){return has(e.title);}).map(function(e){return ['go','calendar',e.title,fDT(e.t)];}))],
+    ['Announcements',S.ann.filter(function(a){return has(a.title)||has(a.body);}).map(function(a){return ['go','announcements',a.title,a.by];})],
+    ['Community',S.posts.filter(function(p){return has(p.title);}).map(function(p){return ['post',p.id,p.title,p.tag];})]
+  ].filter(function(g){return g[1].length;});
+  if(!groups.length)return '<div class="muted" style="padding:20px;text-align:center">No results for “'+esc(q)+'”</div>';
+  return groups.map(function(g){return '<div class="sgrp">'+g[0]+'</div><div class="sres">'+g[1].slice(0,5).map(function(r){return '<button data-a="'+r[0]+'" data-id="'+r[1]+'" data-v="'+r[1]+'"><div style="min-width:0"><div class="sb trunc">'+esc(r[2])+'</div><div class="xs muted trunc" style="text-transform:capitalize">'+esc(r[3])+'</div></div></button>';}).join('')+'</div>';}).join('');
+}
+
+/* ---------------------------------------------------------------- login */
+function loginView(){
+  var otp=S.ui.loginStep==='otp';
+  return '<div class="login"><div class="lhero"><div class="row" style="position:relative;z-index:1">'+logo(36)+'<b style="font-size:18px">Campus<span style="color:var(--gold-2)">360</span></b></div><h1>Everything at IIM Raipur, <span>in one place.</span></h1><p>Classes, exams, events, case competitions, parcels, lost & found, a student marketplace and your batch community. No more hunting through WhatsApp groups.</p><div class="lfeat">'+[['clock','Timetable & exams'],['trophy','Case competitions'],['box','Parcel alerts'],['bag','Buy & sell']].map(function(f){return '<div>'+I(f[0])+f[1]+'</div>';}).join('')+'</div></div>'+
+  '<div class="lform"><div>'+(otp?
+    '<form class="form" data-f="otp"><button type="button" class="link row" data-a="loginBack">'+I('back','sm')+'Change email</button><h2 style="font-size:26px;font-family:var(--display)">Check your inbox</h2><p class="muted" style="margin:0">Enter the 6-digit code sent to <b style="color:var(--ink)">'+esc(S.user.email)+'</b>.</p><label class="f" for="code">Verification code<input id="code" name="code" class="inp otpinp" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••"></label><div class="demo-hint">Prototype: use code <b>123456</b></div><span class="err" id="lerr"></span><button class="btn full" style="height:46px">Verify & continue</button></form>':
+    '<form class="form" data-f="email"><div class="row" style="margin-bottom:6px">'+logo(32)+'<b style="font-size:17px">Campus<span style="color:var(--gold)">360</span></b></div><h2 style="font-size:26px;font-family:var(--display)">Sign in</h2><p class="muted" style="margin:0">New or returning, we’ll email you a 6-digit code. No password needed.</p><label class="f" for="em">Institute email<input id="em" name="email" type="email" class="inp" style="height:46px" value="'+esc(S.user.email)+'" required></label><span class="err" id="lerr"></span><button class="btn full" style="height:46px">Continue</button><div class="small" style="display:flex;gap:8px;background:var(--tint);border-radius:12px;padding:10px 12px;color:var(--navy-2)">'+I('shield')+'Only verified @iimraipur.ac.in addresses can join.</div></form>')+'</div></div></div>';
+}
+function onboardView(){
+  var u=S.user;
+  return '<div style="max-width:560px;margin:0 auto;padding:32px 20px"><div class="row" style="margin-bottom:20px">'+logo(32)+'<b style="font-size:17px">Campus<span style="color:var(--gold)">360</span></b></div><div class="card" style="padding:26px"><h1 style="font-family:var(--display);font-size:26px">Welcome! Let’s set up your profile</h1><p class="muted" style="margin:4px 0 18px">This personalises your timetable, exams, batch board and teammate matches.</p><form class="form" data-f="onboard"><label class="f" for="ob-n">Full name<input id="ob-n" name="name" class="inp" value="'+esc(u.name)+'" required></label><div class="formrow"><label class="f" for="ob-p">Programme<select id="ob-p" name="program" class="inp"><option>MBA</option><option>Executive MBA</option><option>PhD</option></select></label><label class="f" for="ob-b">Batch<select id="ob-b" name="batch" class="inp"><option>2026-28</option><option>2025-27</option><option>PhD</option></select></label><label class="f" for="ob-s">Section<select id="ob-s" name="section" class="inp"><option>A</option><option>B</option><option>C</option><option>D</option></select></label><label class="f" for="ob-h">Hostel / block<input id="ob-h" name="hostel" class="inp" value="'+esc(u.hostel)+'"></label></div><div><div class="small sb" style="margin-bottom:8px">Interests</div><div class="pick">'+INTERESTS.map(function(i,ix){return '<label for="in'+ix+'"><input id="in'+ix+'" type="checkbox" name="int" value="'+i+'"'+(u.interests.indexOf(i)>=0?' checked':'')+'><span>'+i+'</span></label>';}).join('')+'</div></div><button class="btn gold full" style="height:46px">Enter Campus360</button></form></div></div>';
+}
+
+/* ---------------------------------------------------------------- render */
+function render(){
+  var a=document.activeElement,id=a&&a.id,pos=a&&'selectionStart' in a?a.selectionStart:null;
+  var html=!S.logged?loginView():!S.onboarded?onboardView():shell();
+  document.getElementById('app').innerHTML='<div class="proto"><b>Prototype</b> · All names, events, companies and figures are sample data, not official IIM Raipur information.'+(S.logged?'<button data-a="reset">Reset demo</button>':'')+'</div>'+html;
+  if(id){var el=document.getElementById(id);if(el){el.focus();try{if(pos!=null)el.setSelectionRange(pos,pos);}catch(e){}}}
+  var ms=document.getElementById('msgs');if(ms)ms.scrollTop=ms.scrollHeight;
+}
+function open(m){M=m;render();var q=document.getElementById('q');if(q)q.focus();}
+function close(){M=null;render();}
+function go(v){M=null;location.hash=v;if(view()===v)render();window.scrollTo(0,0);}
+
+/* ---------------------------------------------------------------- actions */
+var A={
+  set:function(d){S.ui[d.k]=d.v;if(d.k==='opView'||d.k==='adTab')window.scrollTo(0,0);save();render();},
+  go:function(d){go(d.v||d.id);},
+  close:function(){close();},
+  collapse:function(){S.ui.collapsed=!S.ui.collapsed;save();render();},
+  dismiss:function(){S.ui.welcome=false;save();render();},
+  search:function(){open({t:'search'});},
+  more:function(){open({t:'more'});},
+  ttchanges:function(){S.ui.ttView='changes';save();},
+  role:function(){S.role=S.role==='admin'?'student':'admin';save();toast(S.role==='admin'?'Admin view: you can now manage the campus':'Back to the student view');if(S.role==='admin')go('admin');else render();},
+  reset:function(){var l=S.logged;S=seed();S.logged=l;S.onboarded=l;M=null;save();toast('Sample data restored');go('home');},
+  logout:function(){S.logged=false;S.ui.loginStep='email';M=null;save();location.hash='';render();},
+  loginBack:function(){S.ui.loginStep='email';render();},
+  event:function(d){open({t:'event',id:d.id});},
+  opp:function(d){open({t:'opp',id:d.id});},
+  listing:function(d){open({t:'listing',id:d.id});},
+  lf:function(d){open({t:'lf',id:d.id});},
+  post:function(d){open({t:'post',id:d.id});},
+  reg:function(d){var e=S.events.find(function(x){return x.id===d.id;});if(e.reg>=e.cap){e.me='waitlisted';e.wait++;toast('Event is full: you’re on the waitlist');}else{e.me='registered';e.reg++;toast('You’re registered! See you there.');}save();render();},
+  unreg:function(d){var e=S.events.find(function(x){return x.id===d.id;});if(e.me==='registered')e.reg--;else e.wait--;e.me=null;save();toast('Registration cancelled');render();},
+  checkin:function(d){var e=S.events.find(function(x){return x.id===d.id;});e.checked=true;save();toast('Checked in to '+e.title);render();},
+  ics:function(d){toast('Added “'+d.v+'” to your calendar');},
+  remind:function(d){if(S.reminders[d.id]){delete S.reminders[d.id];toast('Reminder removed');}else{S.reminders[d.id]={title:d.title,when:'1 day before'};toast('Reminder set for 1 day before');}save();render();},
+  save:function(d){var o=S.opps.find(function(x){return x.id===d.id;});o.saved=!o.saved;save();toast(o.saved?'Saved to your list':'Removed from saved');render();},
+  extReg:function(){toast('Opens the organiser’s registration page');},
+  joinTeam:function(d){var t=S.teams.find(function(x){return x.id===d.id;});t.me='requested';save();toast('Request sent to '+t.owner);render();},
+  newTeam:function(d){open({t:'form',title:'Create a team',html:'<form class="form" data-f="team" data-opp="'+d.id+'"><label class="f" for="tm-n">Team name<input id="tm-n" name="name" class="inp" required></label><label class="f" for="tm-d">About the team<textarea id="tm-d" name="desc" class="inp" placeholder="What you’re aiming for and who you need"></textarea></label><label class="f" for="tm-s">Team size<select id="tm-s" name="max" class="inp"><option>2</option><option selected>3</option><option>4</option></select></label><button class="btn gold">Create team</button></form>'});},
+  wish:function(d){var l=S.listings.find(function(x){return x.id===d.id;});l.wish=!l.wish;save();toast(l.wish?'Added to wishlist':'Removed from wishlist');render();},
+  offer:function(){M.offer=true;render();},
+  sold:function(d){var l=S.listings.find(function(x){return x.id===d.id;});l.status='sold';save();toast('Marked as sold');close();},
+  claim:function(){M.claim=true;render();},
+  resolve:function(d){var i=S.lf.find(function(x){return x.id===d.id;});i.status='resolved';save();toast('Marked as returned');close();},
+  report:function(d){S.reports.unshift({id:uid(),what:d.v,target:d.title,reason:'Reported by a student',by:'You',t:Date.now(),status:'open'});save();toast('Thanks. Moderators will review this.');close();},
+  dm:function(d){var c=S.convos.find(function(x){return x.with===d.v;});if(!c){c={id:uid(),with:d.v,ctx:d.ctx||'Direct message',unread:0,msgs:[]};S.convos.unshift(c);}S.ui.convo=c.id;S.ui.thread=true;save();go('messages');setTimeout(function(){var b=document.getElementById('msgbox');if(b)b.focus();},50);},
+  convo:function(d){S.ui.convo=d.id;S.ui.thread=true;var c=S.convos.find(function(x){return x.id===d.id;});c.unread=0;save();render();},
+  closeThread:function(){S.ui.thread=false;render();},
+  vote:function(d){var p=S.posts.find(function(x){return x.id===d.id;});p.voted=!p.voted;p.votes+=p.voted?1:-1;save();render();},
+  board:function(d){S.ui.board=d.id||null;save();render();window.scrollTo(0,0);},
+  joinBoard:function(d){var b=S.boards.find(function(x){return x.id===d.id;});b.joined=!b.joined;save();toast(b.joined?'Joined '+b.name:'Left '+b.name);render();},
+  readAll:function(){S.notifs.forEach(function(n){n.read=true;});save();toast('All caught up');render();},
+  openNotif:function(d){var n=S.notifs.find(function(x){return x.id===d.id;});n.read=true;save();if(n.go==='timetable')S.ui.ttView='changes';go(n.go||'notifications');},
+  pref:function(d){S.prefs[d.k]=!S.prefs[d.k];save();render();},
+  teamToggle:function(){S.user.team=!S.user.team;save();render();},
+  newParcel:function(){open({t:'form',title:'Register an incoming parcel',html:'<form class="form" data-f="parcel"><div class="formrow"><label class="f" for="pc-c">Courier company<input id="pc-c" name="courier" class="inp" list="couriers" required placeholder="e.g. Blue Dart"></label><label class="f" for="pc-t">Tracking ID<input id="pc-t" name="track" class="inp" required></label><label class="f" for="pc-i">What is it?<input id="pc-i" name="item" class="inp" placeholder="e.g. Books"></label><label class="f" for="pc-s">Sender<input id="pc-s" name="sender" class="inp" placeholder="e.g. Amazon"></label></div><datalist id="couriers"><option value="Blue Dart"><option value="Delhivery"><option value="DTDC"><option value="Ekart"><option value="India Post"><option value="Xpressbees"></datalist><button class="btn gold">Register parcel</button></form>'});},
+  newLF:function(d){open({t:'form',title:d.v==='lost'?'Report a lost item':'Report a found item',html:'<form class="form" data-f="lfnew" data-kind="'+d.v+'"><label class="f" for="lf-t">Item<input id="lf-t" name="title" class="inp" required placeholder="e.g. Black wireless earbuds"></label><div class="formrow"><label class="f" for="lf-c">Category<select id="lf-c" name="cat" class="inp">'+Object.keys(LFC).map(function(k){return '<option value="'+k+'">'+LFC[k]+'</option>';}).join('')+'</select></label><label class="f" for="lf-l">'+(d.v==='lost'?'Last seen at':'Found at')+'<input id="lf-l" name="loc" class="inp" required placeholder="e.g. Library"></label></div><label class="f" for="lf-d">Description<textarea id="lf-d" name="desc" class="inp" placeholder="Colour, brand, marks…"></textarea><span class="hint">Never post ID, card or phone numbers. Owners prove ownership privately.</span></label><label class="f" for="lf-p">Photo (optional)<input id="lf-p" type="file" accept="image/*" class="inp"></label><span class="err" id="lferr"></span><button class="btn gold">Post</button></form>'});},
+  newListing:function(){open({t:'form',title:'List an item',html:'<form class="form" data-f="listing"><label class="f" for="ls-t">Title<input id="ls-t" name="title" class="inp" required placeholder="e.g. Marketing Management textbook"></label><div class="formrow"><label class="f" for="ls-ty">Type<select id="ls-ty" name="type" class="inp"><option value="sell">Sell</option><option value="exchange">Exchange</option><option value="giveaway">Give away free</option></select></label><label class="f" for="ls-p">Price (₹)<input id="ls-p" name="price" class="inp" inputmode="numeric" placeholder="500"></label><label class="f" for="ls-c">Category<select id="ls-c" name="cat" class="inp">'+Object.keys(MKC).map(function(k){return '<option value="'+k+'">'+MKC[k][0]+'</option>';}).join('')+'</select></label><label class="f" for="ls-co">Condition<select id="ls-co" name="cond" class="inp">'+Object.keys(COND).map(function(k){return '<option value="'+k+'">'+COND[k]+'</option>';}).join('')+'</select></label></div><label class="f" for="ls-d">Description<textarea id="ls-d" name="desc" class="inp"></textarea></label><label class="f" for="ls-ph">Photos (up to 5)<input id="ls-ph" type="file" accept="image/*" multiple class="inp"></label><label class="row small sb" for="ls-n"><input id="ls-n" type="checkbox" name="neg" checked> Open to offers</label><button class="btn gold">Publish listing</button></form>'});},
+  newPost:function(){open({t:'form',title:'New post',html:'<form class="form" data-f="post"><label class="f" for="po-tg">Type<select id="po-tg" name="tag" class="inp"><option>General</option><option>Academic doubt</option><option>Find teammates</option><option>Recommendation</option><option>Peer help</option></select></label><label class="f" for="po-t">Title<input id="po-t" name="title" class="inp" required></label><label class="f" for="po-b">Details<textarea id="po-b" name="body" class="inp"></textarea></label><button class="btn gold">Post</button></form>'});},
+  newGroup:function(){open({t:'form',title:'Create an interest group',html:'<form class="form" data-f="group"><label class="f" for="gr-n">Group name<input id="gr-n" name="name" class="inp" required placeholder="e.g. Photography Circle"></label><label class="f" for="gr-d">Description<input id="gr-d" name="desc" class="inp"></label><button class="btn gold">Create group</button></form>'});},
+  newOpp:function(){open({t:'form',title:'Submit an opportunity',html:'<form class="form" data-f="opp"><label class="f" for="op-t">Title<input id="op-t" name="title" class="inp" required></label><div class="formrow"><label class="f" for="op-o">Organiser<input id="op-o" name="org" class="inp" required></label><label class="f" for="op-c">Category<select id="op-c" name="cat" class="inp">'+Object.keys(OCATS).map(function(k){return '<option value="'+k+'">'+OCATS[k]+'</option>';}).join('')+'</select></label><label class="f" for="op-ty">Type<select id="op-ty" name="type" class="inp">'+Object.keys(OTYPES).map(function(k){return '<option value="'+k+'">'+OTYPES[k]+'</option>';}).join('')+'</select></label><label class="f" for="op-d">Registration closes in<select id="op-d" name="days" class="inp"><option value="3">3 days</option><option value="7" selected>1 week</option><option value="14">2 weeks</option></select></label><label class="f" for="op-p">Prize<input id="op-p" name="prize" class="inp" placeholder="₹50,000"></label><label class="f" for="op-ts">Team size<input id="op-ts" name="team" class="inp" placeholder="2–3"></label></div><label class="f" for="op-l">Registration link<input id="op-l" name="url" class="inp" placeholder="https://"></label><span class="hint">'+(S.role==='admin'?'Published as verified.':'Student submissions show as Unverified until an admin reviews them.')+'</span><button class="btn gold">Submit</button></form>'});},
+  newEvent:function(){open({t:'form',title:'Create an event',html:eventForm()});},
+  newAnn:function(){open({t:'form',title:'New announcement',html:annForm()});},
+  upload:function(){open({t:'form',title:'Upload timetable · term2-2026-28.xlsx',html:'<div class="small" style="background:var(--green-soft);color:var(--green);border-radius:12px;padding:10px 12px;margin-bottom:12px"><b>48 rows checked.</b> No errors found. Ready to import.</div><div class="card scrollx" style="box-shadow:none"><table class="t"><thead><tr><th>Date</th><th>Start</th><th>End</th><th>Course</th><th>Room</th><th>Batch</th><th>Sec</th></tr></thead><tbody>'+sessions(7,8).slice(0,6).map(function(s){return '<tr><td>'+fDay(s.start)+'</td><td>'+fTime(s.start)+'</td><td>'+fTime(s.end)+'</td><td>'+s.code+'</td><td>'+s.room+'</td><td>2026-28</td><td>A</td></tr>';}).join('')+'</tbody></table></div><div class="xs muted" style="margin:8px 0 14px">Showing 6 of 48 rows</div><button class="btn gold full" data-a="importTT">Import 48 class sessions</button>'});},
+  importTT:function(){close();toast('Imported 48 class sessions. Students see them instantly.');},
+  ttCancel:function(d){S.tt[d.id]={status:'cancelled',note:'Cancelled by the Academic Office'};ttNotify(d.id,'Class cancelled');},
+  ttMove:function(d){S.tt[d.id]={status:'relocated',room:'Auditorium',note:'Moved to the Auditorium'};ttNotify(d.id,'Class relocated');},
+  ttRestore:function(d){delete S.tt[d.id];save();toast('Class restored');render();},
+  deskNext:function(d){var p=S.deskParcels.find(function(x){return x.id===d.id;})||S.parcels.find(function(x){return x.id===d.id;});p.st++;if(p.st===3){p.otp=String(Math.floor(100000+Math.random()*900000));p.arrived=Date.now();}
+    if(S.parcels.indexOf(p)>=0)notify({type:'parcels',title:p.st===3?'Your parcel is ready for collection':'Parcel update: '+PST[p.st],body:p.courier+' · '+p.track,pr:p.st===3?'important':'normal',go:'parcels'});
+    save();toast(p.st===3?'Marked ready. The student was notified with an OTP.':'Status updated');render();},
+  remindDesk:function(){toast('Reminder sent to 1 student with an uncollected parcel');},
+  modHide:function(d){var r=S.reports.find(function(x){return x.id===d.id;});r.status='actioned';save();toast('Content hidden and report closed');render();},
+  modDismiss:function(d){var r=S.reports.find(function(x){return x.id===d.id;});r.status='dismissed';save();toast('Report dismissed');render();},
+  verifyOpp:function(d){var o=S.opps.find(function(x){return x.id===d.id;});o.ok=true;notify({type:'opportunities',title:'New opportunity: '+o.title,body:o.org,pr:'normal',go:'competitions'});save();toast('Verified and published to all students');render();}
+};
+function ttNotify(id,label){var s=sessions(0,3).find(function(x){return x.id===id;});notify({type:'academics',title:label+': '+s.code+' '+s.name,body:fDT(s.start)+' · '+s.room+(s.note?' · '+s.note:''),pr:'urgent',go:'timetable'});save();toast(label+'. Section A students were sent an urgent alert.');render();}
+
+var F={
+  email:function(fd){var e=String(fd.get('email')).trim().toLowerCase();if(!/@iimraipur\.ac\.in$/.test(e)){document.getElementById('lerr').textContent='Use your institute email (@iimraipur.ac.in).';return;}S.user.email=e;S.ui.loginStep='otp';render();var c=document.getElementById('code');if(c)c.focus();},
+  otp:function(fd){if(String(fd.get('code')).trim()!=='123456'){document.getElementById('lerr').textContent='That code is incorrect. In this prototype, use 123456.';return;}S.logged=true;save();location.hash='home';render();window.scrollTo(0,0);},
+  onboard:function(fd){var ints=fd.getAll('int');Object.assign(S.user,{name:fd.get('name')||S.user.name,program:fd.get('program'),batch:fd.get('batch'),section:fd.get('section'),hostel:fd.get('hostel'),interests:ints.length?ints:S.user.interests});S.boards[0].name='Batch '+S.user.batch.replace('-','–');S.onboarded=true;save();render();toast('Welcome to Campus360, '+S.user.name.split(' ')[0]+'!');},
+  send:function(fd,f){var x=String(fd.get('x')||'').trim();if(!x)return;var c=S.convos.find(function(y){return y.id===S.ui.convo;});c.msgs.push({me:true,x:x,t:Date.now()});c.typing=true;save();render();
+    setTimeout(function(){c.typing=false;var replies=['Sure! When would you like to meet?','Yes, still available. I’m in Block A after 6 pm.','Sounds good, see you then!','Let me check and get back to you in a bit.'];c.msgs.push({me:false,x:replies[c.msgs.length%replies.length],t:Date.now()});if(view()!=='messages'||S.ui.convo!==c.id)c.unread=(c.unread||0)+1;save();render();},1400);},
+  parcel:function(fd){S.parcels.unshift({id:uid(),item:fd.get('item')||'Parcel',courier:fd.get('courier'),track:fd.get('track'),sender:fd.get('sender')||'Online order',st:0,otp:null,arrived:null,exp:at(3,12)});S.ui.pTab='active';save();close();toast('Parcel registered. You’ll be notified when it reaches campus.');},
+  lfnew:function(fd,f){var txt=String(fd.get('title'))+' '+String(fd.get('desc'));if(/\d{9,}/.test(txt.replace(/[\s-]/g,''))){document.getElementById('lferr').textContent='Please remove ID, card or phone numbers. Owners can prove ownership privately.';return;}
+    var kind=f.dataset.kind,item={id:uid(),kind:kind,title:fd.get('title'),cat:fd.get('cat'),loc:fd.get('loc'),t:Date.now(),desc:fd.get('desc')||'',by:S.user.name,status:'open'};S.lf.unshift(item);S.ui.lfTab='mine';
+    var match=S.lf.find(function(i){return i!==item&&i.kind!==kind&&i.cat===item.cat&&i.status==='open';});
+    if(match)notify({type:'lost_found',title:'Possible match for “'+item.title+'”',body:'A '+match.kind+' item in the same category: '+match.title+' ('+match.loc+')',pr:'important',go:'lost-found'});
+    save();close();toast(match?'Posted. We found a possible match; check your notifications.':'Posted. We’ll alert you about possible matches.');},
+  listing:function(fd){var type=fd.get('type');S.listings.unshift({id:uid(),title:fd.get('title'),cat:fd.get('cat'),type:type,price:type==='sell'?Number(fd.get('price'))||0:0,neg:!!fd.get('neg')&&type==='sell',cond:fd.get('cond'),seller:S.user.name,sbatch:S.user.batch,t:Date.now(),status:'available',wish:false,desc:fd.get('desc')||''});S.ui.mkTab='mine';save();close();toast('Listed! Buyers can now message you.');},
+  offer:function(fd){var l=S.listings.find(function(x){return x.id===M.id;});toast('Offer of '+rupees(fd.get('amt'))+' sent to '+l.seller);close();},
+  claim:function(fd){S.claims.push({item:M.id,msg:fd.get('msg'),status:'pending'});M.claim=false;save();toast('Claim sent. The finder will verify it.');render();},
+  reply:function(fd){var p=S.posts.find(function(x){return x.id===M.id;});p.replies.push({by:S.user.name,x:fd.get('x'),t:Date.now()});save();render();},
+  post:function(fd){S.posts.unshift({id:uid(),board:S.ui.board,title:fd.get('title'),body:fd.get('body')||'',tag:fd.get('tag'),by:S.user.name,t:Date.now(),votes:0,voted:false,replies:[]});save();close();toast('Posted to the board');},
+  group:function(fd){S.boards.push({id:uid(),name:fd.get('name'),kind:'Interest groups',desc:fd.get('desc')||'New group',joined:true});save();close();toast('Group created');},
+  team:function(fd,f){S.teams.unshift({id:uid(),opp:f.dataset.opp,name:fd.get('name'),owner:S.user.name,members:[S.user.name],max:Number(fd.get('max')),need:[],me:'member',desc:fd.get('desc')||''});save();M={t:'opp',id:f.dataset.opp};render();toast('Team created. Others can now request to join.');},
+  opp:function(fd){var o={id:uid(),title:fd.get('title'),org:fd.get('org'),cat:fd.get('cat'),type:fd.get('type'),prize:fd.get('prize')||'—',team:fd.get('team')||'—',reg:Date.now()+Number(fd.get('days'))*D,sub:null,ok:S.role==='admin',saved:false,elig:'See organiser page',desc:'Submitted via Campus360.'};S.opps.push(o);save();close();toast(o.ok?'Published to all students':'Submitted. An admin will verify it shortly.');},
+  event:function(fd,f){var day=Number(fd.get('day')),cap=Number(fd.get('cap'))||null;var e={id:uid(),title:fd.get('title'),cat:fd.get('cat'),start:at(day,18),end:at(day,20),venue:fd.get('venue')||'Auditorium',org:'Student Council',cap:cap,reg:0,wait:0,me:null,desc:fd.get('desc')||'New event.'};S.events.push(e);notify({type:'events',title:'New event: '+e.title,body:fDT(e.start)+' · '+e.venue,pr:'normal',go:'events'});save();M=null;f.reset();toast('Event published. Students have been notified.');render();},
+  ann:function(fd,f){var a={id:uid(),title:fd.get('title'),body:fd.get('body'),cat:fd.get('cat'),pr:fd.get('pr'),pin:false,official:!!fd.get('official'),by:'Academic Office',t:Date.now()};S.ann.unshift(a);notify({type:'announcements',title:(a.pr==='urgent'?'URGENT: ':'')+a.title,body:a.body,pr:a.pr,go:'announcements'});save();M=null;f.reset();toast('Announcement published and students notified');render();},
+  verify:function(fd,f){var code=String(fd.get('otp')).trim();var all=S.deskParcels.concat(S.parcels);var p=all.find(function(x){return x.st===3&&x.otp===code;});if(!p){toast('Incorrect OTP. No parcel is waiting with that code.');return;}p.st=4;p.otp=null;if(S.parcels.indexOf(p)>=0)notify({type:'parcels',title:'Parcel collected: '+p.item,body:p.courier+' · '+p.track,pr:'normal',go:'parcels'});save();toast('OTP verified. Parcel handed over.');render();}
+};
+
+/* ---------------------------------------------------------------- wiring */
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-a]');
+  if(!el)return;
+  if(el.classList.contains('ov')&&e.target.closest('[data-stop]'))return;
+  var fn=A[el.dataset.a];if(!fn)return;
+  e.preventDefault();
+  if(el.dataset.a==='ttchanges'){A.ttchanges();go('timetable');return;}
+  fn(el.dataset,el);
+});
+document.addEventListener('submit',function(e){var f=e.target;if(f.dataset.f&&F[f.dataset.f]){e.preventDefault();F[f.dataset.f](new FormData(f),f);}});
+document.addEventListener('change',function(e){var b=e.target.dataset&&e.target.dataset.bind;if(b){S.ui[b]=e.target.value;save();render();}});
+document.addEventListener('input',function(e){if(e.target.id==='q'){S.ui.q=e.target.value;document.getElementById('sres').innerHTML=searchResults(e.target.value);}});
+document.addEventListener('keydown',function(e){
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'&&S.logged&&S.onboarded){e.preventDefault();open({t:'search'});}
+  if(e.key==='Escape'&&M)close();
+});
+window.addEventListener('hashchange',function(){M=null;render();window.scrollTo(0,0);});
+setInterval(function(){document.querySelectorAll('.cd[data-t]').forEach(function(s){var t=Number(s.dataset.t);s.lastChild.textContent=(s.dataset.pre||'')+cdl(t);});},30000);
+render();
+})();
+</script>
+</body>
+</html>
